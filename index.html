@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>生活記帳簿｜隨手記一筆，月底不心慌</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f5c63'/%3E%3Cg stroke='%23f7f4ee' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M22 17v30M32 17v30M42 17v30'/%3E%3Cpath d='M17 30h30' stroke-width='2' opacity='.7'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://miaoda.feishu.cn">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+<style>
+/* ============ 設計變數：紙張與墨色的帳本調性 ============ */
+:root{
+  --paper:#f6f2e9;
+  --paper-2:#fffdf8;
+  --ink:#20201c;
+  --ink-soft:#54514a;
+  --muted:#8b857a;
+  --line:#e2dbcb;
+  --line-strong:#cdc4ae;
+  --accent:#0f5c63;
+  --accent-soft:#e0eceb;
+  --rust:#a84525;
+  --rust-soft:#f5e5dd;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(32,32,28,.04),0 8px 24px -12px rgba(32,32,28,.18);
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.7;
+  background-image:
+    radial-gradient(circle at 12% 8%,rgba(15,92,99,.05),transparent 45%),
+    radial-gradient(circle at 88% 0%,rgba(168,69,37,.05),transparent 40%);
+}
+h1,h2,h3,strong.num{font-family:"Noto Serif TC","Songti TC","Times New Roman",serif;}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 20px 64px;}
+
+/* ============ 頁首 ============ */
+.masthead{
+  display:flex;flex-wrap:wrap;gap:16px;
+  align-items:flex-end;justify-content:space-between;
+  padding-bottom:18px;margin-bottom:26px;
+  border-bottom:1px solid var(--line-strong);
+}
+.brand{display:flex;gap:14px;align-items:center;min-width:0;}
+.mark{
+  width:46px;height:46px;flex:none;border-radius:12px;
+  background:var(--accent);display:grid;place-items:center;
+  box-shadow:0 4px 12px -4px rgba(15,92,99,.5);
+}
+.mark svg{width:26px;height:26px;}
+.brand h1{font-size:26px;line-height:1.25;margin:0 0 2px;letter-spacing:.02em;}
+.brand .sub{margin:0;font-size:12.5px;color:var(--muted);letter-spacing:.04em;}
+.mast-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{
+  font:inherit;font-size:13px;padding:8px 14px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--line-strong);background:var(--paper-2);color:var(--ink-soft);
+  transition:background .15s,border-color .15s,color .15s,transform .1s;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent);background:#fff;}
+.btn:active{transform:translateY(1px);}
+.btn.primary{
+  background:var(--accent);border-color:var(--accent);color:#f9f7f1;font-weight:500;
+  padding:10px 20px;font-size:14px;
+}
+.btn.primary:hover{background:#0b4a50;border-color:#0b4a50;color:#fff;}
+.btn.tiny{padding:4px 9px;font-size:12px;border-radius:6px;}
+.btn.danger{color:var(--rust);border-color:#e0c3b6;}
+.btn.danger:hover{background:var(--rust);border-color:var(--rust);color:#fff;}
+
+/* ============ 統計概覽 ============ */
+.overview{
+  display:grid;grid-template-columns:1.3fr 1fr 1fr 1.2fr;gap:12px;margin-bottom:8px;
+}
+@media (max-width:860px){.overview{grid-template-columns:1fr 1fr;}}
+.stat{
+  background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 16px;min-width:0;
+}
+.stat .k{display:block;font-size:11.5px;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;}
+.stat .v{display:flex;align-items:baseline;gap:4px;font-variant-numeric:tabular-nums;}
+.stat strong{font-size:24px;line-height:1.2;font-weight:700;letter-spacing:-.01em;}
+.stat .unit{font-size:12px;color:var(--muted);}
+.stat.accent strong{color:var(--accent);}
+.scope{
+  font-size:12.5px;color:var(--muted);margin:10px 0 22px;
+  display:flex;gap:6px;align-items:center;flex-wrap:wrap;
+}
+.scope b{color:var(--ink-soft);font-weight:500;}
+
+/* ============ 卡片容器 ============ */
+.panel{
+  background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px 22px;margin-bottom:18px;box-shadow:var(--shadow);
+}
+.panel-head{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;margin-bottom:14px;}
+.panel-head h2{font-size:17px;margin:0;letter-spacing:.02em;}
+.panel-head .note{font-size:12px;color:var(--muted);margin:0;}
+
+/* ============ 新增表單 ============ */
+.grid-form{display:grid;grid-template-columns:1.1fr 1.3fr 1.1fr;gap:12px 14px;align-items:end;}
+@media (max-width:760px){.grid-form{grid-template-columns:1fr 1fr;}}
+@media (max-width:520px){.grid-form{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.field label{font-size:12px;color:var(--muted);letter-spacing:.06em;}
+.field input,.field select{
+  width:100%;padding:9px 11px;font:inherit;font-size:14px;color:var(--ink);
+  background:#fff;border:1px solid var(--line-strong);border-radius:8px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.field input:focus,.field select:focus{
+  outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(15,92,99,.12);
+}
+.field input::placeholder{color:#b3ada0;}
+.field.wide{grid-column:1 / span 2;}
+.field.submit{grid-column:3;align-items:stretch;}
+.field.submit .btn{width:100%;height:40px;}
+@media (max-width:760px){
+  .field.wide{grid-column:1 / span 2;}
+  .field.submit{grid-column:1 / span 2;}
+}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
+.chips .lbl{font-size:12px;color:var(--muted);align-self:center;margin-right:2px;}
+.chip{
+  font:inherit;font-size:12.5px;padding:4px 10px;border-radius:999px;cursor:pointer;
+  background:var(--accent-soft);color:#0d4d53;border:1px solid transparent;
+}
+.chip:hover{border-color:var(--accent);}
+.chip[disabled]{opacity:.45;cursor:default;}
+
+/* ============ 紀錄表 ============ */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.toolbar select,.toolbar input{
+  font:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--line-strong);
+  border-radius:8px;background:#fff;color:var(--ink);min-width:0;
+}
+.toolbar input{flex:1 1 160px;}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;table-layout:fixed;font-variant-numeric:tabular-nums;}
+colgroup col:nth-child(1){width:17%;}
+colgroup col:nth-child(2){width:15%;}
+colgroup col:nth-child(3){width:17%;}
+colgroup col:nth-child(4){width:auto;}
+colgroup col:nth-child(5){width:15%;}
+thead th{
+  font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.1em;text-align:left;
+  padding:8px 10px;border-bottom:1px solid var(--line-strong);background:var(--paper-2);
+  position:sticky;top:0;
+}
+tbody td{padding:11px 10px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle;}
+tbody tr:hover{background:#faf7f0;}
+td.date{color:var(--ink-soft);font-size:13px;letter-spacing:.02em;}
+td.cat span{
+  display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;
+  background:var(--accent-soft);color:#0d4d53;white-space:nowrap;
+}
+td.money{text-align:right;font-weight:500;}
+td.note{color:var(--ink-soft);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+td.ops{text-align:right;white-space:nowrap;}
+td.ops .btn{margin-left:4px;}
+tfoot td{padding:12px 10px;font-weight:500;border-top:2px solid var(--line-strong);}
+tfoot .sum{text-align:right;color:var(--accent);font-size:16px;}
+.empty{padding:38px 10px;text-align:center;color:var(--muted);font-size:14px;}
+.empty b{display:block;color:var(--ink-soft);font-size:15px;margin-bottom:4px;font-weight:500;}
+
+/* ============ 分類佔比 ============ */
+.bars{display:flex;flex-direction:column;gap:11px;}
+.bar-row{display:grid;grid-template-columns:88px 1fr auto;gap:10px;align-items:center;}
+.bar-name{font-size:13px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{height:9px;border-radius:999px;background:#efeade;overflow:hidden;}
+.bar-fill{height:100%;border-radius:999px;background:var(--accent);width:0;transition:width .5s cubic-bezier(.2,.7,.2,1);}
+.bar-val{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+/* ============ 說明區 ============ */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px 32px;}
+@media (max-width:760px){.about-grid{grid-template-columns:1fr;}}
+.about-grid h3{font-size:14px;margin:0 0 6px;letter-spacing:.04em;color:var(--accent);}
+.about-grid p,.about-grid li{font-size:13.5px;color:var(--ink-soft);margin:0 0 8px;}
+.about-grid ul{margin:0;padding-left:18px;}
+.about-grid li{margin-bottom:4px;}
+.tip{margin-top:16px;padding:11px 14px;border-radius:8px;background:var(--rust-soft);color:#7a3a20;font-size:13px;}
+
+/* ============ 發票 / 收據自動入帳 ============ */
+.dropzone{
+  border:1.5px dashed var(--line-strong);border-radius:var(--radius);
+  background:#fffdf8;padding:22px 18px;text-align:center;cursor:pointer;
+  transition:border-color .15s,background .15s;
+}
+.dropzone:hover,.dropzone.drag{border-color:var(--accent);background:#f1f7f6;}
+.dropzone .dz-title{font-size:14px;color:var(--ink-soft);margin-bottom:3px;}
+.dropzone .dz-hint{font-size:12.5px;color:var(--muted);}
+.dz-actions{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;}
+.scan-status{margin-top:12px;font-size:13px;color:var(--ink-soft);min-height:1.4em;}
+.scan-status.err{color:var(--rust);}
+.scan-status.ok{color:var(--accent);}
+.parse-card{
+  margin-top:16px;border:1px solid var(--line-strong);border-radius:var(--radius);
+  background:#fff;padding:16px;display:none;
+}
+.parse-card[data-open="1"]{display:block;}
+.parse-head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between;margin-bottom:14px;}
+.parse-head strong{font-size:14px;}
+.parse-head .src{font-size:11.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 9px;}
+.parse-body{display:flex;gap:16px;align-items:flex-start;}
+.parse-thumb{
+  flex:none;width:132px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#f6f2e9;
+  cursor:zoom-in;
+}
+.parse-thumb img{display:block;width:100%;height:auto;}
+.parse-fields{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;}
+@media (max-width:700px){
+  .parse-body{flex-direction:column;}
+  .parse-thumb{width:100%;max-width:200px;}
+  .parse-fields{grid-template-columns:1fr 1fr;width:100%;}
+}
+.parse-fields .field.sp{grid-column:1 / -1;}
+.parse-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
+.parse-foot .warn{font-size:12.5px;color:var(--rust);flex:1 1 220px;min-width:0;}
+.badge-ev{
+  display:inline-block;font-size:10.5px;line-height:1.5;padding:0 5px;border-radius:4px;
+  background:var(--rust-soft);color:#8a3a1e;border:1px solid #e3c9ba;cursor:pointer;
+  margin-right:6px;vertical-align:1px;
+}
+.badge-ev:hover{background:var(--rust);color:#fff;}
+.notice{
+  margin-top:12px;padding:10px 13px;border-radius:8px;background:var(--accent-soft);
+  color:#0b4a50;font-size:12.5px;line-height:1.65;
+}
+.manual-inv{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
+.manual-inv summary{font-size:12.5px;color:var(--muted);cursor:pointer;letter-spacing:.02em;}
+.manual-inv summary:hover{color:var(--accent);}
+
+/* ============ 編輯對話框 ============ */
+dialog{
+  border:none;border-radius:12px;padding:0;width:min(92vw,420px);
+  box-shadow:0 24px 60px -20px rgba(32,32,28,.45);background:var(--paper-2);
+}
+dialog::backdrop{background:rgba(32,32,28,.35);backdrop-filter:blur(2px);}
+.dlg-body{padding:22px 22px 18px;}
+.dlg-body h3{margin:0 0 16px;font-size:17px;}
+.dlg-body .field{margin-bottom:12px;}
+.dlg-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;}
+
+/* ============ 提示條 ============ */
+#toast{
+  position:fixed;left:50%;bottom:28px;transform:translate(-50%,16px);
+  background:var(--ink);color:#f8f5ee;font-size:13.5px;padding:9px 18px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;max-width:90vw;
+}
+#toast.on{opacity:1;transform:translate(-50%,0);}
+
+/* ============ 頁尾 ============ */
+footer{
+  margin-top:34px;padding-top:16px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== 頁首 ===== -->
+  <header class="masthead">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f7f4ee" stroke-width="1.6" stroke-linecap="round">
+          <path d="M6 4v16M12 4v16M18 4v16"/><path d="M4 11h16" opacity=".65" stroke-width="1.2"/>
+        </svg>
+      </span>
+      <div>
+        <h1>生活記帳簿</h1>
+        <p class="sub">隨手記一筆 · 月底不心慌 · 資料只留在你自己的裝置</p>
+      </div>
+    </div>
+    <div class="mast-actions">
+      <button class="btn" id="btnExportCsv" type="button">匯出 CSV</button>
+      <button class="btn" id="btnExportTxt" type="button">匯出 TXT</button>
+    </div>
+  </header>
+
+  <!-- ===== 統計概覽 ===== -->
+  <section class="overview" aria-label="統計概覽">
+    <article class="stat accent">
+      <span class="k">篩選結果總支出</span>
+      <div class="v"><strong id="statTotal">0.00</strong><span class="unit">元</span></div>
+    </article>
+    <article class="stat">
+      <span class="k">筆數</span>
+      <div class="v"><strong id="statCount">0</strong><span class="unit">筆</span></div>
+    </article>
+    <article class="stat">
+      <span class="k">平均單筆</span>
+      <div class="v"><strong id="statAvg">0.00</strong><span class="unit">元</span></div>
+    </article>
+    <article class="stat">
+      <span class="k">花最多的類別</span>
+      <div class="v"><strong id="statTop" style="font-size:19px">—</strong></div>
+    </article>
+  </section>
+  <p class="scope">目前統計範圍：<b id="scopeHint">全部紀錄</b><span>（變更下方篩選條件即同步更新）</span></p>
+
+  <!-- ===== 新增一筆 ===== -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2>記一筆消費</h2>
+      <p class="note">日期預設為今天，金額單位為新台幣元</p>
+    </div>
+    <form id="addForm" class="grid-form" autocomplete="off">
+      <div class="field">
+        <label for="fDate">日期</label>
+        <input type="date" id="fDate" required>
+      </div>
+      <div class="field">
+        <label for="fCat">類別</label>
+        <input id="fCat" list="catList" placeholder="例：餐飲" maxlength="12" required>
+        <datalist id="catList"></datalist>
+      </div>
+      <div class="field">
+        <label for="fAmount">金額（元）</label>
+        <input type="number" id="fAmount" min="0.01" step="0.01" placeholder="0.00" required>
+      </div>
+      <div class="field wide">
+        <label for="fNote">備註</label>
+        <input id="fNote" maxlength="60" placeholder="選填，例：午餐便當">
+      </div>
+      <div class="field submit">
+        <button class="btn primary" type="submit">記下這筆</button>
+      </div>
+    </form>
+    <div class="chips" id="chips">
+      <span class="lbl">常用類別</span>
+    </div>
+  </section>
+
+  <!-- ===== 發票 / 收據自動入帳 ===== -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2>拍一張就好：發票／收據自動入帳</h2>
+      <p class="note">電子發票掃 QR，紙本收據讀文字，金額仍可手動修正</p>
+    </div>
+
+    <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="上傳或拖放發票圖片">
+      <div class="dz-title">把發票或收據拖進來，或點這裡選檔</div>
+      <div class="dz-hint">電子發票證明聯的照片、手機截圖、財政部寄來的電子發票 PDF 都支援；也可 Ctrl+V 直接貼上</div>
+    </div>
+    <div class="dz-actions">
+      <button class="btn" id="btnPick" type="button">選擇圖片／PDF</button>
+      <button class="btn" id="btnPaste" type="button">貼上剪貼簿圖片</button>
+      <input type="file" id="fileInput" accept="image/*,application/pdf" hidden>
+    </div>
+    <div class="scan-status" id="scanStatus">尚未選擇圖片。</div>
+
+    <div class="parse-card" id="parseCard" data-open="0">
+      <div class="parse-head">
+        <strong>解析結果，確認後才入帳</strong>
+        <span class="src" id="parseSrc">—</span>
+      </div>
+      <div class="parse-body">
+        <div class="parse-thumb" id="parseThumb" title="點擊放大">
+          <img id="pvThumb" alt="發票縮圖">
+        </div>
+        <div class="parse-fields">
+          <div class="field">
+            <label for="pvDate">消費日期</label>
+            <input type="date" id="pvDate" required>
+          </div>
+          <div class="field">
+            <label for="pvAmount">金額（元）</label>
+            <input type="number" id="pvAmount" min="0.01" step="0.01" required>
+          </div>
+          <div class="field">
+            <label for="pvName">店家／品項</label>
+            <input id="pvName" maxlength="40" placeholder="例：全家便利商店">
+          </div>
+          <div class="field">
+            <label for="pvCat">類別</label>
+            <input id="pvCat" list="catList" maxlength="12" placeholder="自動判斷，可修改" required>
+          </div>
+          <div class="field sp">
+            <label for="pvNote">備註（會一併存進紀錄）</label>
+            <input id="pvNote" maxlength="60" placeholder="例：早餐＋咖啡">
+          </div>
+          <div class="field sp">
+            <label for="pvNo">發票號碼（自動讀取，用於防止重複入帳）</label>
+            <input id="pvNo" maxlength="20" placeholder="紙本收據可留空">
+            <span id="invMeta" style="font-size:11.5px;color:var(--muted);letter-spacing:.02em"></span>
+          </div>
+        </div>
+      </div>
+      <div class="parse-foot">
+        <span class="warn" id="parseWarn">自動判讀可能有誤，請先核對金額與日期再入帳。</span>
+        <div class="dz-actions" style="margin:0">
+          <button class="btn" id="btnCancelParse" type="button">取消</button>
+          <button class="btn primary" id="btnConfirmParse" type="button">確認入帳</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="notice">
+      判讀順序：先找電子發票證明聯上的 QR Code（可直接取得發票號碼、開立日期與含稅總額，準確度最高）；
+      沒掃到 QR 才改用文字辨識（OCR），並從「總計／合計／應付／結帳金額」等關鍵字附近抓金額。
+      兩者都只是輔助，最後一定要由你確認，避免記錯帳。
+    </p>
+
+    <details class="manual-inv">
+      <summary>QR 拍不清楚？手動輸入電子發票（字軌號碼＋開立日期）</summary>
+      <div class="parse-fields" style="margin-top:12px">
+        <div class="field">
+          <label for="miNo">字軌號碼</label>
+          <input id="miNo" maxlength="10" placeholder="AB12345678">
+        </div>
+        <div class="field">
+          <label for="miDate">開立日期</label>
+          <input type="date" id="miDate">
+        </div>
+        <div class="field">
+          <label for="miRandom">隨機碼（4 碼，選填）</label>
+          <input id="miRandom" maxlength="4" inputmode="numeric" placeholder="1234">
+        </div>
+        <div class="field">
+          <label for="miAmount">含稅總額（選填）</label>
+          <input type="number" id="miAmount" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field sp">
+          <button class="btn primary" id="btnManual" type="button" style="width:100%">產生待確認草稿</button>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ===== 紀錄清單 ===== -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2>消費紀錄</h2>
+      <p class="note" id="listNote"></p>
+    </div>
+    <div class="toolbar">
+      <select id="fltMonth" aria-label="依月份篩選"><option value="all">全部月份</option></select>
+      <select id="fltCat" aria-label="依類別篩選"><option value="all">全部類別</option></select>
+      <input id="fltQuery" type="search" placeholder="搜尋備註或類別…" aria-label="關鍵字搜尋">
+      <button class="btn" id="btnReset" type="button">清除篩選</button>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <colgroup><col><col><col><col><col></colgroup>
+        <thead>
+          <tr><th>日期</th><th>類別</th><th style="text-align:right">金額</th><th>備註</th><th style="text-align:right">操作</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+        <tfoot id="tfoot" hidden>
+          <tr><td colspan="2">合計</td><td class="sum" id="footSum">0.00</td><td colspan="2"></td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="empty" id="emptyState" hidden>
+      <b>還沒有任何紀錄</b>
+      在上面填一筆消費，就會出現在這裡。
+    </div>
+  </section>
+
+  <!-- ===== 分類佔比 ===== -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2>類別佔比</h2>
+      <p class="note">依目前篩選結果計算</p>
+    </div>
+    <div class="bars" id="bars"></div>
+    <p class="scope" id="barsEmpty" style="margin-bottom:0" hidden>目前沒有可以統計的資料。</p>
+  </section>
+
+  <!-- ===== 專題說明 ===== -->
+  <section class="panel">
+    <div class="panel-head">
+      <h2>作品說明</h2>
+      <p class="note">程式設計作業 · 生活實用 App</p>
+    </div>
+    <div class="about-grid">
+      <div>
+        <h3>為什麼做這個</h3>
+        <p>每天零碎的花費最難掌握，等到月底才發現錢不見了。這份工具把「記一筆」壓到三秒內完成：選類別、打金額、按下去就好，日期自動帶入今天，不需要開表單層層填寫。</p>
+        <h3>核心功能</h3>
+        <ul>
+          <li>新增消費：日期、類別、金額、備註，含輸入驗證</li>
+          <li>發票／收據自動入帳：照片、截圖、財政部寄來的電子發票 PDF 都吃，先掃 QR，沒有 QR 才用文字辨識</li>
+          <li>電子發票專屬處理：讀出字軌號碼、開立日期、隨機碼、賣方統編，自動算期別，並擋重複入帳</li>
+          <li>QR 拍不清時可手動輸入字軌號碼與開立日期，走同一套確認流程</li>
+          <li>一律經人工確認才寫入，金額、類別、店家都可以改</li>
+          <li>同一店家會記住分類（以賣方統編辨識），下次自動歸檔</li>
+          <li>同一張發票號碼不會重複入帳</li>
+          <li>即時統計：總支出、筆數、平均單筆、最花錢類別</li>
+          <li>三種篩選：月份、類別、關鍵字，可疊加使用</li>
+          <li>就地編輯與刪除，資料即時更新</li>
+          <li>匯出 CSV（可進 Excel）與 TXT（純文字備份）</li>
+          <li>類別佔比長條圖，一眼看出錢花去哪</li>
+        </ul>
+      </div>
+      <div>
+        <h3>技術與資料</h3>
+        <p>單一 HTML 檔案，內含 HTML、CSS 與原生 JavaScript，不使用框架或建置工具，也不需要伺服器：用瀏覽器打開就能跑。</p>
+        <p>發票辨識的兩條路線：QR 用瀏覽器原生 <code>BarcodeDetector</code>，不支援時以 <code>jsQR</code> 備援，並會把圖片旋轉 90／180／270 度重試；紙本收據用 <code>Tesseract.js</code> 做正體中文文字辨識；PDF 電子發票用 <code>pdf.js</code> 轉成影像後再掃 QR。以上都在瀏覽器本機執行，發票圖片不會上傳到任何伺服器。</p>
+        <p>資料以 JSON 格式存在瀏覽器 <code>localStorage</code>，重新整理、關閉瀏覽器後再回來都還在。</p>
+        <h3>已知限制</h3>
+        <ul>
+          <li>資料只存在這台裝置的這個瀏覽器，不會跨裝置同步</li>
+          <li>清除瀏覽器資料或使用無痕模式，紀錄會消失</li>
+          <li>QR 只支援台灣電子發票證明聯；傳統手寫收據只能靠 OCR 或手動輸入</li>
+          <li>「載具（手機條碼）自動匯入」需要後端與財政部電子發票平台 API 授權，純前端做不到，目前未實作</li>
+          <li>OCR 第一次使用要下載模型，需連網；字跡模糊、反光時金額可能讀錯，務必確認</li>
+          <li>憑證縮圖存在瀏覽器內，容量約 5MB，滿了只保留帳目、捨棄圖片</li>
+        </ul>
+      </div>
+    </div>
+    <p class="tip">提醒：本工具沒有伺服器，資料不會上傳到任何地方。要換裝置使用時，先匯出 CSV 或 TXT 再自行保存。</p>
+
+    <details class="manual-inv" style="margin-top:14px">
+      <summary>授權與原始碼（MIT，可自由下載與修改）</summary>
+      <div style="margin-top:10px;font-size:13px;color:var(--ink-soft);line-height:1.75">
+        <p style="margin:0 0 8px">本作品以 <strong>MIT 授權</strong> 釋出：任何人都可以自由下載、使用、修改、合併、發布、再散布，也可以商業使用，唯一的條件是保留原始的著作權與授權聲明。</p>
+        <p style="margin:0 0 8px">取得原始碼的方式：這個網站本身就是單一 HTML 檔，在瀏覽器按 <code>Ctrl+S</code> 存檔，或對頁面按右鍵「檢視網頁原始碼」，即可拿到完整程式碼（HTML、CSS、JavaScript 都寫在同一個檔案裡，沒有其他依賴檔）。</p>
+        <p style="margin:0">改作與再散布時，建議保留頁尾這行授權聲明，讓下一個使用者也知道這份程式碼是自由的。</p>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <span>生活記帳簿 · 單頁網頁應用 · HTML / CSS / JavaScript</span>
+    <span>資料存於本機瀏覽器</span>
+    <span>MIT 授權：任何人可自由下載、修改、再散布，只需保留授權聲明</span>
+  </footer>
+</div>
+
+<!-- ===== 編輯對話框 ===== -->
+<dialog id="editDlg">
+  <form class="dlg-body" id="editForm">
+    <h3>修改這筆紀錄</h3>
+    <div class="field">
+      <label for="eDate">日期</label>
+      <input type="date" id="eDate" required>
+    </div>
+    <div class="field">
+      <label for="eCat">類別</label>
+      <input id="eCat" maxlength="12" required>
+    </div>
+    <div class="field">
+      <label for="eAmount">金額（元）</label>
+      <input type="number" id="eAmount" min="0.01" step="0.01" required>
+    </div>
+    <div class="field">
+      <label for="eNote">備註</label>
+      <input id="eNote" maxlength="60">
+    </div>
+    <div class="dlg-actions">
+      <button class="btn" type="button" id="btnCancelEdit">取消</button>
+      <button class="btn primary" type="submit">儲存變更</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="evDlg">
+  <div class="dlg-body" style="text-align:center">
+    <img id="evImg" alt="憑證" style="max-width:100%;max-height:70vh;border-radius:8px;display:block;margin:0 auto 16px">
+    <button class="btn" type="button" id="btnCloseEv">關閉</button>
+  </div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ==================================================================
+   生活記帳簿 — 前端邏輯
+   資料模型：{ id, date:'YYYY-MM-DD', cat, amount, note }
+   儲存：localStorage（key 見 STORE_KEY）
+================================================================== */
+(function () {
+  "use strict";
+
+  var STORE_KEY = "life-ledger-v1";
+  var DEFAULT_CATS = ["餐飲", "交通", "日用品", "娛樂", "醫療", "學費", "房租", "通訊", "其他"];
+
+  var records = [];          // 全部紀錄
+  var editingId = null;      // 目前正在編輯的紀錄 id
+  var filter = { month: "all", cat: "all", q: "" };
+
+  /* ---------- 通用小工具 ---------- */
+  function $(id) { return document.getElementById(id); }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  function todayStr() {
+    var d = new Date();
+    var off = d.getTimezoneOffset() * 60000;
+    return new Date(d.getTime() - off).toISOString().slice(0, 10);
+  }
+
+  function money(n) {
+    var v = Number(n) || 0;
+    return v.toLocaleString("zh-TW", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function monthOf(dateStr) { return String(dateStr).slice(0, 7); }
+
+  function toast(msg) {
+    var t = $("toast");
+    t.textContent = msg;
+    t.classList.add("on");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.classList.remove("on"); }, 2200);
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  /* ---------- 讀寫 localStorage ---------- */
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      var parsed = raw ? JSON.parse(raw) : [];
+      records = Array.isArray(parsed) ? parsed.filter(function (r) {
+        return r && r.id && r.date && Number(r.amount) > 0;
+      }) : [];
+    } catch (e) {
+      records = [];
+    }
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(records));
+      return true;
+    } catch (e) {
+      // 憑證縮圖佔空間，存不下時先犧牲圖片、保住帳目
+      try {
+        var lean = records.map(function (r) {
+          var o = { id: r.id, date: r.date, cat: r.cat, amount: r.amount, note: r.note };
+          if (r.invoiceNo) o.invoiceNo = r.invoiceNo;
+          if (r.sellerId) o.sellerId = r.sellerId;
+          return o;
+        });
+        localStorage.setItem(STORE_KEY, JSON.stringify(lean));
+        toast("儲存空間不足：帳目已保存，憑證圖片這次沒有存下來");
+        return true;
+      } catch (e2) {
+        toast("瀏覽器儲存空間已滿，這筆資料可能沒有保存，建議先匯出備份");
+        return false;
+      }
+    }
+  }
+
+  /* ---------- 篩選 ---------- */
+  function filtered() {
+    var q = filter.q.trim().toLowerCase();
+    return records.filter(function (r) {
+      if (filter.month !== "all" && monthOf(r.date) !== filter.month) return false;
+      if (filter.cat !== "all" && r.cat !== filter.cat) return false;
+      if (q) {
+        var hay = (r.cat + " " + (r.note || "")).toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    }).sort(function (a, b) {
+      if (a.date === b.date) return 0;
+      return a.date < b.date ? 1 : -1;   // 新到舊
+    });
+  }
+
+  /* ---------- 統計 ---------- */
+  function stats(list) {
+    var total = 0, byCat = {}, count = list.length;
+    list.forEach(function (r) {
+      var amt = Number(r.amount) || 0;
+      total += amt;
+      byCat[r.cat] = (byCat[r.cat] || 0) + amt;
+    });
+    var top = null, topVal = -1;
+    Object.keys(byCat).forEach(function (k) {
+      if (byCat[k] > topVal) { topVal = byCat[k]; top = k; }
+    });
+    return { total: total, count: count, avg: count ? total / count : 0, byCat: byCat, top: top };
+  }
+
+  /* ---------- 渲染：下拉選單 ---------- */
+  function fillSelects() {
+    var months = {}, cats = {};
+    records.forEach(function (r) {
+      months[monthOf(r.date)] = 1;
+      cats[r.cat] = (cats[r.cat] || 0) + 1;
+    });
+
+    var mSel = $("fltMonth");
+    var monthList = Object.keys(months).sort().reverse();
+    mSel.innerHTML = '<option value="all">全部月份</option>' + monthList.map(function (m) {
+      return '<option value="' + esc(m) + '">' + esc(m.replace("-", " 年 ") + " 月") + "</option>";
+    }).join("");
+    if (filter.month !== "all" && !months[filter.month]) filter.month = "all";
+    mSel.value = filter.month;
+
+    var cSel = $("fltCat");
+    var catList = Object.keys(cats).sort(function (a, b) { return cats[b] - cats[a]; });
+    cSel.innerHTML = '<option value="all">全部類別</option>' + catList.map(function (c) {
+      return '<option value="' + esc(c) + '">' + esc(c) + "（" + cats[c] + "）</option>";
+    }).join("");
+    if (filter.cat !== "all" && !cats[filter.cat]) filter.cat = "all";
+    cSel.value = filter.cat;
+
+    // 類別輸入建議：預設類別 + 使用者自訂過的
+    var allCats = DEFAULT_CATS.concat(Object.keys(cats));
+    var uniq = [], seen = {};
+    allCats.forEach(function (c) { if (!seen[c]) { seen[c] = 1; uniq.push(c); } });
+    $("catList").innerHTML = uniq.map(function (c) {
+      return '<option value="' + esc(c) + '"></option>';
+    }).join("");
+
+    // 常用類別快選
+    var chips = $("chips");
+    chips.innerHTML = '<span class="lbl">常用類別</span>' + uniq.slice(0, 8).map(function (c) {
+      return '<button class="chip" type="button" data-cat="' + esc(c) + '">' + esc(c) + "</button>";
+    }).join("");
+  }
+
+  /* ---------- 渲染：概覽 + 表格 + 佔比 ---------- */
+  function render() {
+    var list = filtered();
+    var s = stats(list);
+
+    $("statTotal").textContent = money(s.total);
+    $("statCount").textContent = String(s.count);
+    $("statAvg").textContent = money(s.avg);
+    $("statTop").textContent = s.top ? s.top : "—";
+
+    var scope = [];
+    if (filter.month !== "all") scope.push(filter.month.replace("-", " 年 ") + " 月");
+    if (filter.cat !== "all") scope.push("類別「" + filter.cat + "」");
+    if (filter.q.trim()) scope.push("關鍵字「" + filter.q.trim() + "」");
+    $("scopeHint").textContent = scope.length ? scope.join(" · ") : "全部紀錄";
+
+    // 表格
+    var tbody = $("tbody");
+    tbody.innerHTML = list.map(function (r) {
+      return '<tr data-id="' + esc(r.id) + '">' +
+        '<td class="date">' + esc(r.date) + "</td>" +
+        '<td class="cat"><span>' + esc(r.cat) + "</span></td>" +
+        '<td class="money">' + money(r.amount) + "</td>" +
+        '<td class="note" title="' + esc((r.note || "") + (r.invoiceNo ? " ｜ 發票 " + r.invoiceNo : "")) + '">' +
+          (r.evidence ? '<button class="badge-ev" data-act="ev" type="button" title="查看憑證">票</button>' : "") +
+          (r.note ? esc(r.note) : '<span style="color:#b3ada0">—</span>') +
+        "</td>" +
+        '<td class="ops">' +
+          '<button class="btn tiny" data-act="edit" type="button">編輯</button>' +
+          '<button class="btn tiny danger" data-act="del" type="button">刪除</button>' +
+        "</td></tr>";
+    }).join("");
+
+    var hasRows = list.length > 0;
+    $("emptyState").hidden = hasRows;
+    $("tfoot").hidden = !hasRows;
+    $("footSum").textContent = money(s.total);
+    $("listNote").textContent = records.length
+      ? "共 " + records.length + " 筆，目前顯示 " + list.length + " 筆"
+      : "";
+
+    // 佔比
+    var bars = $("bars");
+    var entries = Object.keys(s.byCat).map(function (k) { return { name: k, val: s.byCat[k] }; })
+      .sort(function (a, b) { return b.val - a.val; });
+    if (!entries.length) {
+      bars.innerHTML = "";
+      $("barsEmpty").hidden = false;
+    } else {
+      $("barsEmpty").hidden = true;
+      var max = entries[0].val || 1;
+      bars.innerHTML = entries.map(function (e) {
+        var pct = s.total ? (e.val / s.total * 100) : 0;
+        return '<div class="bar-row">' +
+          '<span class="bar-name" title="' + esc(e.name) + '">' + esc(e.name) + "</span>" +
+          '<span class="bar-track"><span class="bar-fill" style="width:' + Math.max(2, e.val / max * 100).toFixed(1) + '%"></span></span>' +
+          '<span class="bar-val">' + money(e.val) + " 元 · " + pct.toFixed(1) + "%</span>" +
+          "</div>";
+      }).join("");
+    }
+  }
+
+  /* ---------- 新增 ---------- */
+  $("addForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var date = $("fDate").value;
+    var cat = $("fCat").value.trim();
+    var amount = parseFloat($("fAmount").value);
+    var note = $("fNote").value.trim();
+
+    if (!date) { toast("請選擇日期"); return; }
+    if (!cat) { toast("請填寫類別"); return; }
+    if (!isFinite(amount) || amount <= 0) { toast("金額必須是大於 0 的數字"); return; }
+
+    records.push({
+      id: uid(),
+      date: date,
+      cat: cat,
+      amount: Math.round(amount * 100) / 100,
+      note: note
+    });
+    save();
+    $("fAmount").value = "";
+    $("fNote").value = "";
+    $("fCat").value = "";
+    $("fDate").value = todayStr();
+    fillSelects();
+    render();
+    toast("已記下：" + cat + " " + money(amount) + " 元");
+  });
+
+  /* ---------- 常用類別快選 ---------- */
+  $("chips").addEventListener("click", function (ev) {
+    var btn = ev.target.closest(".chip");
+    if (!btn) return;
+    $("fCat").value = btn.getAttribute("data-cat");
+    $("fAmount").focus();
+  });
+
+  /* ---------- 篩選事件 ---------- */
+  $("fltMonth").addEventListener("change", function () { filter.month = this.value; render(); });
+  $("fltCat").addEventListener("change", function () { filter.cat = this.value; render(); });
+  $("fltQuery").addEventListener("input", function () { filter.q = this.value; render(); });
+  $("btnReset").addEventListener("click", function () {
+    filter = { month: "all", cat: "all", q: "" };
+    $("fltMonth").value = "all";
+    $("fltCat").value = "all";
+    $("fltQuery").value = "";
+    render();
+  });
+
+  /* ---------- 表格操作：編輯 / 刪除 ---------- */
+  $("tbody").addEventListener("click", function (ev) {
+    var btn = ev.target.closest("button[data-act]");
+    if (!btn) return;
+    var tr = btn.closest("tr");
+    var id = tr && tr.getAttribute("data-id");
+    if (!id) return;
+
+    // 查看憑證
+    if (btn.getAttribute("data-act") === "ev") {
+      var evRec = records.find(function (x) { return x.id === id; });
+      if (evRec && evRec.evidence) openEvidence(evRec.evidence);
+      else toast("這筆沒有保存憑證圖片");
+      return;
+    }
+
+    if (btn.getAttribute("data-act") === "del") {
+      var rec = records.find(function (r) { return r.id === id; });
+      if (!rec) return;
+      if (!confirm("確定刪除「" + rec.cat + " " + money(rec.amount) + " 元」這筆紀錄？")) return;
+      records = records.filter(function (r) { return r.id !== id; });
+      save();
+      fillSelects();
+      render();
+      toast("已刪除該筆紀錄");
+      return;
+    }
+
+    // 編輯
+    var r = records.find(function (x) { return x.id === id; });
+    if (!r) return;
+    editingId = id;
+    $("eDate").value = r.date;
+    $("eCat").value = r.cat;
+    $("eAmount").value = r.amount;
+    $("eNote").value = r.note || "";
+    if (typeof $("editDlg").showModal === "function") {
+      $("editDlg").showModal();
+    } else {
+      $("editDlg").setAttribute("open", "open");
+    }
+  });
+
+  $("editForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var r = records.find(function (x) { return x.id === editingId; });
+    if (!r) { $("editDlg").close(); return; }
+
+    var date = $("eDate").value;
+    var cat = $("eCat").value.trim();
+    var amount = parseFloat($("eAmount").value);
+    var note = $("eNote").value.trim();
+
+    if (!date || !cat || !isFinite(amount) || amount <= 0) {
+      toast("資料格式有誤，請確認日期、類別與金額");
+      return;
+    }
+
+    r.date = date;
+    r.cat = cat;
+    r.amount = Math.round(amount * 100) / 100;
+    r.note = note;
+
+    save();
+    $("editDlg").close();
+    fillSelects();
+    render();
+    toast("已更新該筆紀錄");
+  });
+
+  $("btnCancelEdit").addEventListener("click", function () { $("editDlg").close(); });
+
+  /* ---------- 匯出 CSV ---------- */
+  function download(filename, text, mime) {
+    var blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+
+  $("btnExportCsv").addEventListener("click", function () {
+    var list = filtered();
+    if (!list.length) { toast("目前沒有可匯出的紀錄"); return; }
+    var rows = [["日期", "類別", "金額", "備註", "發票號碼"]];
+    list.forEach(function (r) {
+      rows.push([r.date, r.cat, (Number(r.amount) || 0).toFixed(2), r.note || "", r.invoiceNo || ""]);
+    });
+    var csv = rows.map(function (row) {
+      return row.map(function (cell) {
+        var s = String(cell);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      }).join(",");
+    }).join("\r\n");
+    download("記帳紀錄_" + todayStr() + ".csv", "\ufeff" + csv, "text/csv;charset=utf-8");
+    toast("已匯出 " + list.length + " 筆 CSV");
+  });
+
+  /* ---------- 匯出 TXT ---------- */
+  $("btnExportTxt").addEventListener("click", function () {
+    var list = filtered();
+    if (!list.length) { toast("目前沒有可匯出的紀錄"); return; }
+    var s = stats(list);
+    var lines = [
+      "生活記帳簿 — 紀錄匯出",
+      "匯出日期：" + todayStr(),
+      "筆數：" + list.length + "　總支出：" + money(s.total) + " 元",
+      "--------------------------------------------------"
+    ];
+    list.forEach(function (r, i) {
+      lines.push(
+        (i + 1) + ". " + r.date + " ｜ " + r.cat + " ｜ " + money(r.amount) + " 元" +
+        (r.note ? " ｜ " + r.note : "")
+      );
+    });
+    lines.push("--------------------------------------------------");
+    download("記帳紀錄_" + todayStr() + ".txt", lines.join("\r\n"));
+    toast("已匯出 " + list.length + " 筆 TXT");
+  });
+
+  /* ==================================================================
+     發票／收據自動入帳
+     流程：圖片 → QR 掃描（優先，最準）→ OCR（備援）→ 產生草稿 → 人工確認
+     電子發票 QR 依財政部「電子發票證明聯一維及二維條碼規格」：
+       前 77 碼 = 字軌號碼(10)＋民國日期(7)＋隨機碼(4)＋未稅銷售額(8,Hex)
+                ＋含稅總計額(8,Hex)＋買方統編(8)＋賣方統編(8)＋驗證資訊(24)
+     後段以「:」分隔，含營業人自用區、品目筆數、編碼參數、品名／數量／單價。
+  ================================================================== */
+  var SELLER_KEY = "life-ledger-sellers-v1";
+  var sellerMap = {};        // 賣方統編 -> { name, cat }，用來記住同一店家歸哪一類
+  var draft = null;          // 目前待確認的解析草稿
+  var busy = false;          // 避免同時處理多張圖
+
+  function loadSellers() {
+    try {
+      var raw = localStorage.getItem(SELLER_KEY);
+      var parsed = raw ? JSON.parse(raw) : {};
+      sellerMap = (parsed && typeof parsed === "object") ? parsed : {};
+    } catch (e) { sellerMap = {}; }
+  }
+
+  function saveSellers() {
+    try { localStorage.setItem(SELLER_KEY, JSON.stringify(sellerMap)); } catch (e) {}
+  }
+
+  /* 店家／品項關鍵字 → 類別，僅作為「建議值」，使用者永遠可以改 */
+  var CAT_RULES = [
+    ["餐飲", ["餐", "食", "咖啡", "茶", "飲料", "早餐", "午餐", "晚餐", "便當", "麵", "飯", "粥", "鍋",
+              "燒肉", "壽司", "披薩", "麥當勞", "肯德基", "摩斯", "漢堡", "星巴克", "路易莎", "85度C",
+              "手搖", "夜市", "小吃", "烘焙", "蛋糕", "甜點", "豆漿", "水餃", "滷味", "鹽酥雞", "拉麵", "食堂"]],
+    ["交通", ["加油", "中油", "台塑", "汽油", "柴油", "停車", "捷運", "台鐵", "高鐵", "悠遊卡", "一卡通",
+              "計程車", "客運", "公車", "火車", "機票", "航空", "洗車", "保養", "牌照", "充電"]],
+    ["日用品", ["全聯", "家樂福", "大潤發", "愛買", "頂好", "美廉社", "楓康", "屈臣氏", "康是美", "寶雅",
+                "小北", "五金", "超市", "便利商店", "7-11", "7-ELEVEN", "統一超商", "全家", "萊爾富",
+                "OKmart", "好市多", "Costco", "衛生紙", "清潔", "洗衣"]],
+    ["娛樂", ["電影", "威秀", "秀泰", "國賓", "遊戲", "Steam", "KTV", "錢櫃", "好樂迪", "門票", "展覽",
+              "遊樂", "桌遊", "訂閱", "Netflix", "Spotify", "健身", "球場", "游泳"]],
+    ["醫療", ["藥局", "藥房", "診所", "醫院", "牙醫", "中醫", "掛號", "復健", "檢驗", "眼科", "皮膚科", "疫苗", "保健"]],
+    ["學費", ["學費", "補習", "書局", "書店", "文具", "教科", "課程", "線上課", "報名"]],
+    ["房租", ["房租", "租金", "管理費", "押金", "水費", "電費", "瓦斯"]],
+    ["通訊", ["中華電信", "遠傳", "台灣大哥大", "台灣之星", "亞太", "寬頻", "電話費", "月租", "儲值", "電信"]]
+  ];
+
+  function guessCat(text) {
+    if (!text) return "";
+    var t = String(text);
+    for (var i = 0; i < CAT_RULES.length; i++) {
+      var keys = CAT_RULES[i][1];
+      for (var j = 0; j < keys.length; j++) {
+        if (t.indexOf(keys[j]) !== -1) return CAT_RULES[i][0];
+      }
+    }
+    return "";
+  }
+
+  function decodeB64Utf8(b64) {
+    try {
+      var bin = atob(b64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return new TextDecoder("utf-8").decode(bytes);
+    } catch (e) { return b64; }
+  }
+
+  /* ---------- 解析台灣電子發票 QR ---------- */
+  function parseEInvoiceQR(raw) {
+    var s = String(raw || "").replace(/\s+/g, "");
+    if (!/^[A-Z]{2}\d{8}/.test(s)) return null;   // 字軌號碼：2 英文 + 8 數字
+    if (s.length < 77) return null;
+
+    var invoiceNo = s.substr(0, 10);
+    var roc = s.substr(10, 7);                    // 民國年 3 碼 + 月 2 碼 + 日 2 碼
+    var randomCode = s.substr(17, 4);
+    var salesHex = s.substr(21, 8);                // 未稅銷售額（十六進位）
+    var totalHex = s.substr(29, 8);                // 含稅總計額（十六進位）
+    var sellerId = s.substr(45, 8);
+
+    var m = roc.match(/^(\d{3})(\d{2})(\d{2})$/);
+    if (!m) return null;
+    var y = parseInt(m[1], 10) + 1911;
+    var mo = parseInt(m[2], 10);
+    var dd = parseInt(m[3], 10);
+    if (mo < 1 || mo > 12 || dd < 1 || dd > 31) return null;
+
+    var total = parseInt(totalHex, 16);
+    if (!isFinite(total) || total <= 0) return null;
+    var sales = parseInt(salesHex, 16);
+
+    var items = [];
+    try {
+      var rest = s.substr(77).split(":");
+      var enc = rest[4];                 // 0=Big5 1=UTF-8 2=Base64
+      var take = parseInt(rest[2], 10);
+      if (!isFinite(take) || take < 0) take = 0;
+      for (var k = 0; k < take; k++) {
+        var nm = rest[5 + k * 3];
+        if (!nm) continue;
+        if (enc === "2") nm = decodeB64Utf8(nm);
+        if (nm && nm !== "**") items.push(nm);
+      }
+    } catch (e) { items = []; }
+
+    return {
+      source: "QR",
+      invoiceNo: invoiceNo,
+      sellerId: (sellerId && sellerId !== "00000000") ? sellerId : "",
+      date: y + "-" + String(mo).padStart(2, "0") + "-" + String(dd).padStart(2, "0"),
+      amount: total,
+      items: items,
+      itemText: items.join(" "),
+      randomCode: randomCode,
+      text: ""
+    };
+  }
+
+  /* ---------- 圖片工具 ---------- */
+  function loadImg(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { res(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error("decode failed")); };
+      img.src = url;
+    });
+  }
+
+  function cropCanvas(img, sx, sy, sw, sh, maxW) {
+    var scale = Math.min(1, maxW / sw);
+    var c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(sw * scale));
+    c.height = Math.max(1, Math.round(sh * scale));
+    c.getContext("2d").drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
+    return c;
+  }
+
+  function makeThumb(img, maxSide, quality) {
+    var scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+    var c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(img.width * scale));
+    c.height = Math.max(1, Math.round(img.height * scale));
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    try { return c.toDataURL("image/jpeg", quality || 0.6); } catch (e) { return ""; }
+  }
+
+  function loadScript(src) {
+    return new Promise(function (res, rej) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.onload = function () { res(); };
+      s.onerror = function () { rej(new Error("script load failed")); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function rotateCanvas(src, deg) {
+    var c = document.createElement("canvas");
+    var sw = src.width, sh = src.height;
+    if (deg % 180 === 0) { c.width = sw; c.height = sh; }
+    else { c.width = sh; c.height = sw; }
+    var ctx = c.getContext("2d");
+    ctx.translate(c.width / 2, c.height / 2);
+    ctx.rotate(deg * Math.PI / 180);
+    ctx.drawImage(src, -sw / 2, -sh / 2);
+    return c;
+  }
+
+  /* ---------- PDF 電子發票（財政部寄送、超商 kiosk 列印的 PDF） ---------- */
+  async function loadPdfJs() {
+    if (window.pdfjsLib) return window.pdfjsLib;
+    await loadScript("https://fastly.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js");
+    if (!window.pdfjsLib) throw new Error("pdf.js load failed");
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://fastly.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+    return window.pdfjsLib;
+  }
+
+  async function renderPdfPages(file, maxPages) {
+    var lib = await loadPdfJs();
+    var doc = await lib.getDocument({ data: await file.arrayBuffer() }).promise;
+    var out = [];
+    var n = Math.min(doc.numPages, maxPages || 3);
+    for (var p = 1; p <= n; p++) {
+      var page = await doc.getPage(p);
+      var vp = page.getViewport({ scale: 2.2 });
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.round(vp.width);
+      canvas.height = Math.round(vp.height);
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: vp }).promise;
+      out.push(canvas);
+    }
+    return out;
+  }
+
+  /* 發票期別：單月奇數 → 該兩個月一期（1-2、3-4 …） */
+  function periodOf(dateStr) {
+    var y = parseInt(String(dateStr).slice(0, 4), 10);
+    var m = parseInt(String(dateStr).slice(5, 7), 10);
+    if (!y || !m || m < 1 || m > 12) return "";
+    var end = (m % 2 === 1) ? m + 1 : m;
+    return (y - 1911) + "年 " + (end - 1) + "-" + end + "月";
+  }
+
+  /* ---------- QR 掃描：原生 BarcodeDetector 優先，jsQR 備援 ---------- */
+  async function scanQRValues(source) {
+    var found = [];
+
+    if ("BarcodeDetector" in window) {
+      try {
+        var det = new window.BarcodeDetector({ formats: ["qr_code"] });
+        var codes = await det.detect(source);
+        codes.forEach(function (c) {
+          if (c.rawValue && found.indexOf(c.rawValue) === -1) found.push(c.rawValue);
+        });
+      } catch (e) { /* 不支援就往下走 */ }
+    }
+    if (found.length) return found;
+
+    try {
+      if (!window.jsQR) await loadScript("https://fastly.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js");
+    } catch (e) { return found; }
+    if (!window.jsQR) return found;
+
+    function scanOnce(sw, sh, sx, sy, maxW) {
+      if (sw < 2 || sh < 2) return;
+      var c = cropCanvas(source, sx, sy, sw, sh, maxW);
+      var ctx = c.getContext("2d", { willReadFrequently: true });
+      var data = ctx.getImageData(0, 0, c.width, c.height);
+      var res = window.jsQR(data.data, data.width, data.height, { inversionAttempts: "attemptBoth" });
+      if (res && res.data && found.indexOf(res.data) === -1) found.push(res.data);
+    }
+
+    // 第一輪：全圖、左半、右半（證明聯左右各一顆 QR），各試兩種解析度
+    var W = source.width, H = source.height;
+    var regions = [
+      [0, 0, W, H],
+      [0, 0, Math.round(W * 0.55), H],
+      [Math.round(W * 0.45), 0, Math.round(W * 0.55), H]
+    ];
+    for (var r = 0; r < regions.length && found.length < 2; r++) {
+      scanOnce(regions[r][2], regions[r][3], regions[r][0], regions[r][1], 1400);
+      if (found.length >= 2) break;
+      scanOnce(regions[r][2], regions[r][3], regions[r][0], regions[r][1], 2400);
+    }
+    if (found.length) return found;
+
+    // 第二輪：手機拍歪、發票橫放時，轉 90／270／180 度再試
+    var base = cropCanvas(source, 0, 0, W, H, 1600);
+    var angles = [90, 270, 180];
+    for (var a = 0; a < angles.length && !found.length; a++) {
+      var rot = rotateCanvas(base, angles[a]);
+      scanOnce(rot.width, rot.height, 0, 0, 1600);
+    }
+    return found;
+  }
+
+  /* ---------- OCR（Tesseract.js，正體中文＋英文） ---------- */
+  async function runOCR(file, onProgress) {
+    try {
+      if (!window.Tesseract) {
+        await loadScript("https://fastly.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js");
+      }
+    } catch (e) { return null; }
+    if (!window.Tesseract) return null;
+
+    var worker = await window.Tesseract.createWorker("chi_tra+eng", 1, {
+      logger: function (m) {
+        if (m && m.status === "recognizing text" && onProgress) {
+          onProgress(Math.round((m.progress || 0) * 100));
+        }
+      }
+    });
+    var out = await worker.recognize(file);
+    await worker.terminate();
+    return (out && out.data && out.data.text) || "";
+  }
+
+  /* ---------- 從收據文字猜金額、日期、店名 ---------- */
+  var AMT_KEY = /(總計|總額|合計|應付|應繳|實付|實收|結帳|消費金額|發票金額|小計|TOTAL|Total|AMOUNT|Amount)/;
+  var AMT_MAIN = /(總計|總額|應付|應繳|實付|結帳|消費金額|發票金額|TOTAL|Total|AMOUNT|Amount)/;
+  var NOISE_LINE = /(統編|統一編號|電話|TEL|TAX ID|日期|時間|發票|載具|載具號碼|http|www|營業人|簽章)/;
+  var NUM_RE = /\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+\.\d{1,2}|\d{2,6}/;
+
+  function toNumber(s) {
+    var n = parseFloat(String(s).replace(/,/g, ""));
+    return isFinite(n) ? n : null;
+  }
+
+  function parseReceiptText(text) {
+    var result = {
+      source: "OCR", text: text || "", amount: null, date: "",
+      name: "", items: [], itemText: "", invoiceNo: ""
+    };
+
+    var raw = String(text || "");
+    var lines = raw.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+
+    // 日期：民國或西元年
+    var dm = raw.match(/(\d{2,4})\s*[年\/\-\.]\s*(\d{1,2})\s*[月\/\-\.]\s*(\d{1,2})\s*日?/);
+    if (dm) {
+      var y = parseInt(dm[1], 10);
+      if (y < 1911) y += 1911;
+      else if (y < 100) y += 2000;
+      var mo = parseInt(dm[2], 10), dd = parseInt(dm[3], 10);
+      if (mo >= 1 && mo <= 12 && dd >= 1 && dd <= 31) {
+        result.date = y + "-" + String(mo).padStart(2, "0") + "-" + String(dd).padStart(2, "0");
+      }
+    }
+
+    // 金額：優先取「總計」類關鍵字後面的第一個數字，避免抓到現金、找零
+    var main = [], sub = [];
+    lines.forEach(function (line) {
+      if (!AMT_KEY.test(line)) return;
+      if (NOISE_LINE.test(line)) return;
+      var km = line.match(AMT_KEY);
+      var after = line.slice(km.index + km[0].length);
+      var nm = after.match(NUM_RE) || line.match(NUM_RE);
+      if (!nm) return;
+      var v = toNumber(nm[0]);
+      if (!v || v <= 0 || v > 999999) return;
+      (AMT_MAIN.test(line) ? main : sub).push(v);
+    });
+    var pool = main.length ? main : sub;
+    if (pool.length) {
+      result.amount = Math.max.apply(null, pool);
+    } else {
+      // 沒有關鍵字時：取全文中「像金額」的最大值（排除 7 位以上，多半是發票號碼）
+      var all = raw.match(/\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+\.\d{1,2}|\d{2,6}/g) || [];
+      var cand = [];
+      all.forEach(function (t) {
+        var v = toNumber(t);
+        if (v && v >= 1 && v <= 200000) cand.push(v);
+      });
+      if (cand.length) result.amount = Math.max.apply(null, cand);
+    }
+
+    // 店名：前幾行裡找帶店家字樣的
+    var NAME_KEY = /(公司|商行|商店|商號|超市|百貨|門市|餐|飲|咖啡|藥局|加油站|店|行|mart|MART|Store|STORE)/;
+    var name = "";
+    for (var i = 0; i < Math.min(lines.length, 8); i++) {
+      var l = lines[i].replace(/[^\u4e00-\u9fa5A-Za-z0-9（）()\-\.\s]/g, "").trim();
+      if (l.length < 2 || l.length > 28) continue;
+      if (/^[\d\s\-\.\/]+$/.test(l)) continue;
+      if (NOISE_LINE.test(l)) continue;
+      if (NAME_KEY.test(l)) { name = l; break; }
+      if (!name && !/\d{4,}/.test(l)) name = l;
+    }
+    result.name = name;
+
+    // 畫面上若印了字軌號碼就直接抓
+    var im = raw.replace(/\s/g, "").match(/[A-Z]{2}\d{8}/);
+    if (im) result.invoiceNo = im[0];
+
+    // 品項關鍵字整併，用來推測類別
+    result.itemText = lines.slice(0, 12).join(" ").slice(0, 120);
+    return result;
+  }
+
+  /* ---------- 狀態列 ---------- */
+  function setStatus(msg, cls) {
+    var el = $("scanStatus");
+    el.textContent = msg;
+    el.className = "scan-status" + (cls ? " " + cls : "");
+  }
+
+  /* ---------- 主流程 ---------- */
+  async function handleFile(file) {
+    if (busy) { toast("正在處理上一張，請稍等"); return; }
+    if (!file) return;
+
+    var isPdf = /application\/pdf/.test(file.type || "") || /\.pdf$/i.test(file.name || "");
+    if (!isPdf && !/^image\//.test(file.type || "")) {
+      setStatus("請選擇圖片，或財政部寄來的電子發票 PDF。", "err");
+      return;
+    }
+
+    busy = true;
+    hideDraft();
+
+    var pages = [];       // 每一頁的影像（圖片或 PDF 轉出的 canvas）
+    if (isPdf) {
+      setStatus("正在讀取 PDF 電子發票…");
+      try { pages = await renderPdfPages(file, 3); }
+      catch (e) {
+        busy = false;
+        setStatus("PDF 讀不進來（可能是加密檔或格式特殊）。可以先把發票截圖成圖片再上傳。", "err");
+        return;
+      }
+      if (!pages.length) { busy = false; setStatus("這份 PDF 沒有可讀的頁面。", "err"); return; }
+    } else {
+      setStatus("正在讀取圖片…");
+      try { pages = [await loadImg(file)]; }
+      catch (e) {
+        busy = false;
+        setStatus("這張圖片讀不進來，換一張或先轉成 JPG 再試。", "err");
+        return;
+      }
+    }
+
+    var thumb = makeThumb(pages[0], 520, 0.62);
+    var parsed = null;
+
+    // 第一階段：QR 掃描（照片、截圖、PDF 內嵌的電子發票 QR 都在這一步）
+    for (var pg = 0; pg < pages.length && !parsed; pg++) {
+      setStatus(isPdf ? ("掃描 PDF 第 " + (pg + 1) + " 頁的 QR…") : "掃描電子發票 QR…");
+      var qrs = [];
+      try { qrs = await scanQRValues(pages[pg]); } catch (e) { qrs = []; }
+      for (var i = 0; i < qrs.length; i++) {
+        var p1 = parseEInvoiceQR(qrs[i]);
+        if (p1) { parsed = p1; break; }
+      }
+    }
+
+    if (parsed) {
+      setStatus("讀到電子發票：字軌 " + parsed.invoiceNo + "，含稅總額 " + parsed.amount + " 元。", "ok");
+    } else {
+      // 第二階段：OCR（只跑第一頁，避免等太久）
+      setStatus("沒有讀到 QR，改用文字辨識（第一次要下載模型，請稍候）…");
+      var text;
+      try { text = await runOCR(pages[0], function (pct) { setStatus("文字辨識中… " + pct + "%"); }); }
+      catch (e) { text = null; }
+
+      if (text === null) {
+        busy = false;
+        setStatus("沒有 QR，文字辨識引擎也載入失敗（可能被網路或防火牆阻擋）。可用下方「手動輸入電子發票」，或換一張清楚的圖。", "err");
+        return;
+      }
+      parsed = parseReceiptText(text);
+      if (parsed.amount || parsed.date || parsed.name) {
+        setStatus("文字辨識完成，金額與日期請再確認一次。", "ok");
+      } else {
+        setStatus("這張圖沒有辨識出可用的金額，請看縮圖手動填寫。", "err");
+      }
+    }
+
+    buildDraft(parsed, thumb);
+    busy = false;
+  }
+
+  /* 把解析結果整理成待確認草稿（QR / OCR / 手動輸入共用） */
+  function buildDraft(parsed, thumb) {
+    var known = (parsed.sellerId && sellerMap[parsed.sellerId]) ? sellerMap[parsed.sellerId] : null;
+    draft = {
+      source: parsed.source,
+      invoiceNo: parsed.invoiceNo || "",
+      sellerId: parsed.sellerId || "",
+      randomCode: parsed.randomCode || "",
+      date: parsed.date || todayStr(),
+      amount: parsed.amount || 0,
+      name: (known && known.name) || parsed.name || "",
+      cat: (known && known.cat) || guessCat(parsed.name) || guessCat(parsed.itemText) || guessCat(parsed.text) || "",
+      note: (parsed.itemText || "").slice(0, 60),
+      thumb: thumb || ""
+    };
+    showDraft();
+  }
+
+  function showDraft() {
+    if (draft.thumb) {
+      $("pvThumb").src = draft.thumb;
+      $("parseThumb").style.display = "";
+    } else {
+      $("pvThumb").removeAttribute("src");
+      $("parseThumb").style.display = "none";
+    }
+    $("pvDate").value = draft.date;
+    $("pvAmount").value = draft.amount ? Number(draft.amount).toFixed(2) : "";
+    $("pvName").value = draft.name;
+    $("pvCat").value = draft.cat;
+    $("pvNote").value = draft.note;
+    $("pvNo").value = draft.invoiceNo;
+    var srcMap = { QR: "來源：電子發票 QR", OCR: "來源：文字辨識 OCR", MANUAL: "來源：手動輸入字軌" };
+    $("parseSrc").textContent = srcMap[draft.source] || "來源：未知";
+
+    // 電子發票的輔助資訊：期別、隨機碼、賣方統編
+    var meta = [];
+    if (draft.invoiceNo) meta.push("字軌 " + draft.invoiceNo);
+    if (draft.date) meta.push("期別 " + periodOf(draft.date));
+    if (draft.randomCode) meta.push("隨機碼 " + draft.randomCode);
+    if (draft.sellerId) meta.push("賣方統編 " + draft.sellerId);
+    $("invMeta").textContent = meta.length ? meta.join("　·　") : "";
+
+    $("parseWarn").textContent = (draft.amount && draft.date)
+      ? "已自動填入，請核對金額與日期後入帳。"
+      : (draft.thumb ? "沒有完整辨識出金額或日期，請看縮圖補填。" : "請補上金額、店家與類別。");
+    $("parseCard").setAttribute("data-open", "1");
+    try { $("parseCard").scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e) {}
+  }
+
+  function hideDraft() {
+    draft = null;
+    $("parseCard").setAttribute("data-open", "0");
+    $("pvThumb").removeAttribute("src");
+  }
+
+  function openEvidence(url) {
+    if (!url) return;
+    $("evImg").src = url;
+    if (typeof $("evDlg").showModal === "function") $("evDlg").showModal();
+    else $("evDlg").setAttribute("open", "open");
+  }
+
+  function confirmDraft() {
+    if (!draft) { toast("沒有待確認的解析結果"); return; }
+
+    var date = $("pvDate").value;
+    var amount = parseFloat($("pvAmount").value);
+    var cat = $("pvCat").value.trim();
+    var name = $("pvName").value.trim();
+    var note = $("pvNote").value.trim();
+    var invNo = $("pvNo").value.trim().toUpperCase();
+
+    if (!date) { toast("請選擇消費日期"); return; }
+    if (!isFinite(amount) || amount <= 0) { toast("金額必須大於 0"); return; }
+    if (!cat) { toast("請填寫或選擇類別"); return; }
+
+    if (invNo) {
+      var dup = records.find(function (r) {
+        return r.invoiceNo && String(r.invoiceNo).toUpperCase() === invNo;
+      });
+      if (dup) {
+        toast("這張發票（" + invNo + "）已經入帳過，避免重複記錄");
+        return;
+      }
+    }
+
+    records.push({
+      id: uid(),
+      date: date,
+      cat: cat,
+      amount: Math.round(amount * 100) / 100,
+      note: note || name,
+      invoiceNo: invNo,
+      sellerId: draft.sellerId || "",
+      randomCode: draft.randomCode || "",
+      period: periodOf(date),
+      evidence: draft.thumb || ""
+    });
+
+    // 記住「賣方統編 → 店名＋類別」，下次同店家自動歸類
+    if (draft.sellerId && name) {
+      sellerMap[draft.sellerId] = { name: name, cat: cat };
+      saveSellers();
+    }
+
+    save();
+    var saved = { name: name, amount: amount };
+    hideDraft();
+    fillSelects();
+    render();
+    toast("已入帳：" + (saved.name || cat) + " " + money(saved.amount) + " 元");
+    setStatus("已寫入紀錄，可以繼續拍下一張。", "ok");
+  }
+
+  /* ---------- 事件綁定 ---------- */
+  $("btnPick").addEventListener("click", function () { $("fileInput").click(); });
+  $("dropzone").addEventListener("click", function () { $("fileInput").click(); });
+  $("dropzone").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("fileInput").click(); }
+  });
+  $("fileInput").addEventListener("change", function () {
+    var f = this.files && this.files[0];
+    if (f) handleFile(f);
+    this.value = "";
+  });
+  $("dropzone").addEventListener("dragover", function (e) {
+    e.preventDefault();
+    this.classList.add("drag");
+  });
+  $("dropzone").addEventListener("dragleave", function () { this.classList.remove("drag"); });
+  $("dropzone").addEventListener("drop", function (e) {
+    e.preventDefault();
+    this.classList.remove("drag");
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+  $("btnPaste").addEventListener("click", function () {
+    setStatus("在本頁按 Ctrl+V 貼上截圖即可（截圖工具複製後直接貼）。");
+  });
+  document.addEventListener("paste", function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type && items[i].type.indexOf("image") === 0) {
+        e.preventDefault();
+        var f = items[i].getAsFile();
+        if (f) handleFile(f);
+        return;
+      }
+    }
+  });
+  $("parseThumb").addEventListener("click", function () {
+    if (draft && draft.thumb) openEvidence(draft.thumb);
+  });
+  $("btnCancelParse").addEventListener("click", function () {
+    hideDraft();
+    setStatus("已取消這次解析。");
+  });
+  $("btnConfirmParse").addEventListener("click", confirmDraft);
+  $("btnCloseEv").addEventListener("click", function () { $("evDlg").close(); });
+
+  /* 手動輸入電子發票：字軌號碼＋開立日期，走同一套確認流程 */
+  $("btnManual").addEventListener("click", function () {
+    var no = $("miNo").value.trim().toUpperCase().replace(/\s/g, "");
+    var d = $("miDate").value;
+    var rnd = $("miRandom").value.trim();
+    var amt = parseFloat($("miAmount").value);
+
+    if (!/^[A-Z]{2}\d{8}$/.test(no)) {
+      toast("字軌號碼格式是 2 個英文字母加 8 位數字，例如 AB12345678");
+      $("miNo").focus();
+      return;
+    }
+    if (!d) { toast("請填開立日期"); $("miDate").focus(); return; }
+    if (rnd && !/^\d{4}$/.test(rnd)) { toast("隨機碼是 4 位數字，沒有把握可以留空"); $("miRandom").focus(); return; }
+
+    var manualParsed = {
+      source: "MANUAL",
+      invoiceNo: no,
+      sellerId: "",
+      randomCode: rnd,
+      date: d,
+      amount: isFinite(amt) ? amt : 0,
+      name: "",
+      items: [],
+      itemText: "",
+      text: ""
+    };
+    buildDraft(manualParsed, "");
+    setStatus("已建立手動草稿，請補上金額、店家與類別後入帳。", "ok");
+    $("miNo").value = "";
+    $("miRandom").value = "";
+    $("miAmount").value = "";
+  });
+
+  /* ---------- 啟動 ---------- */
+  function init() {
+    load();
+    loadSellers();
+    $("fDate").value = todayStr();
+    $("miDate").value = todayStr();
+    fillSelects();
+    render();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
