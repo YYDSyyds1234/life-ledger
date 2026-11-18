@@ -440,6 +440,151 @@ body.locked{overflow:hidden;}
 .mv-cat{flex:none;color:var(--ink-soft);}
 .mv-amt{flex:none;font-weight:600;font-variant-numeric:tabular-nums;}
 .mv-note{flex:1 1 auto;min-width:0;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ============ 手機優化元件（桌機不顯示） ============ */
+.only-mobile{display:none;}
+.more-toggle{display:none;}
+.fab{display:none;}
+.foot-link{
+  border:0;background:transparent;font:inherit;font-size:12px;color:var(--accent);
+  cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;
+}
+.foot-link:hover{color:#0b4a50;}
+
+/* 浮動快速記帳 */
+.sheet{position:fixed;inset:0;z-index:80;}
+.sheet[hidden]{display:none;}
+.sheet-bd{position:absolute;inset:0;background:rgba(32,32,28,.42);}
+.sheet-panel{
+  position:absolute;left:0;right:0;bottom:0;max-height:88vh;overflow:auto;
+  background:var(--paper-2);border-top:1px solid var(--line-strong);
+  border-radius:16px 16px 0 0;box-shadow:0 -10px 34px rgba(0,0,0,.18);
+  padding:14px 16px calc(18px + env(safe-area-inset-bottom));
+}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+.sheet-head h3{margin:0;font-size:16px;letter-spacing:.02em;}
+.sheet-row{display:grid;grid-template-columns:1.05fr 1fr;gap:10px;margin-top:10px;}
+.sheet-panel .chips{margin-top:10px;padding-top:0;border-top:0;}
+.sheet-submit{width:100%;height:46px;margin-top:16px;font-size:15px;}
+.sheet-panel input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
+.sheet-panel input[type="number"]::-webkit-outer-spin-button,
+.sheet-panel input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
+/* ============ 手機版（≤560px）：重排＋收納 ============ */
+@media (max-width:560px){
+  .wrap{
+    display:flex;flex-direction:column;
+    padding:14px 12px calc(96px + env(safe-area-inset-bottom));
+  }
+
+  /* 頁首精簡：只留標題、帳本、⋯ */
+  .masthead{gap:10px;padding-bottom:12px;margin-bottom:14px;align-items:center;}
+  .brand{gap:10px;}
+  .mark{width:38px;height:38px;border-radius:10px;}
+  .mark svg{width:22px;height:22px;}
+  .brand h1{font-size:20px;}
+  .brand .sub{display:none;}
+  .mast-actions{width:100%;gap:6px;align-items:center;}
+  .btn{font-size:12.5px;padding:9px 12px;}
+  .btn.tiny{padding:5px 9px;font-size:11.5px;}
+  .book-pill{flex:1 1 auto;max-width:none;}
+  .book-pill span{max-width:none;}
+  .only-mobile{display:inline-flex;}
+  #btnExportCsv,#btnExportTxt,#btnBackup,#btnRestore{display:none;}
+  #mastActions.more-open #btnExportCsv,
+  #mastActions.more-open #btnExportTxt,
+  #mastActions.more-open #btnBackup,
+  #mastActions.more-open #btnRestore{display:inline-flex;}
+
+  /* 區塊順序：記一筆 → 發票 → 統計 → 明細 → 詳細統計 */
+  .masthead{order:0;}
+  #backupNotice,#migrateBar{order:1;}
+  #addPanel{order:2;}
+  #invoicePanel{order:3;}
+  .overview{order:4;}
+  .scope{order:5;}
+  #scopeRow{order:6;}
+  #listPanel{order:7;}
+  #btnMoreStats{order:8;}
+  #budgetPanel{order:9;}
+  #barsPanel{order:10;}
+  footer{order:11;}
+
+  /* 間距與字級壓縮 */
+  .panel{padding:14px 13px;margin-bottom:12px;}
+  .panel-head{margin-bottom:10px;gap:6px;}
+  .panel-head h2{font-size:15.5px;}
+  .panel-head .note{font-size:11.5px;line-height:1.6;}
+  .overview{gap:8px;margin-bottom:6px;}
+  .stat{padding:11px 12px;border-radius:9px;}
+  .stat .k{font-size:10.5px;letter-spacing:.06em;margin-bottom:4px;}
+  .stat strong{font-size:19px;}
+  .scope{margin:4px 0 8px;font-size:12px;}
+  .scope-row{margin:0 0 12px;font-size:12px;}
+  .notice-bar{padding:9px 12px;font-size:12px;margin-bottom:10px;}
+
+  /* 發票區預設收起 */
+  #invoicePanel #invBody{display:none;}
+  #invoicePanel.open #invBody{display:block;}
+  #invoicePanel .panel-head{align-items:center;}
+  #invoicePanel .notice{display:none;}
+
+  /* 統計細項收折 */
+  .more-toggle{
+    display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;
+    padding:12px 13px;margin-bottom:12px;font:inherit;font-size:13px;color:var(--ink-soft);
+    background:var(--paper-2);border:1px dashed var(--line-strong);border-radius:10px;cursor:pointer;
+  }
+  .more-toggle b{color:var(--accent);font-weight:500;font-size:12.5px;}
+  .m-block{display:none;}
+  body.mstats-open .m-block{display:block;}
+
+  /* 明細改成卡片式 */
+  .table-scroll{overflow:visible;}
+  #listPanel table{display:block;width:100%;table-layout:auto;border-collapse:separate;border-spacing:0;}
+  thead{display:none;}
+  tbody,tfoot{display:block;width:100%;}
+  tr,td{display:block;}
+  tbody tr{
+    display:grid;grid-template-columns:1fr auto;
+    grid-template-areas:"cat money" "note note" "date ops";
+    gap:2px 10px;padding:9px 11px;margin-bottom:8px;
+    background:#fff;border:1px solid var(--line);border-radius:9px;
+  }
+  #listPanel tbody td{padding:0;border-bottom:0;font-size:13px;}
+  #listPanel td.cat{grid-area:cat;font-weight:600;color:var(--ink);line-height:1.35;}
+  #listPanel td.cat span{background:none;padding:0;font-size:13px;color:var(--ink);}
+  #listPanel td.money{grid-area:money;text-align:right;font-size:16.5px;font-weight:700;color:var(--ink);line-height:1.35;}
+  #listPanel td.money::after{content:" 元";font-size:11px;font-weight:400;color:var(--muted);}
+  #listPanel td.note{
+    grid-area:note;color:var(--muted);font-size:12.5px;line-height:1.45;
+    white-space:normal;word-break:break-word;max-width:none;
+  }
+  #listPanel td.date{grid-area:date;color:var(--muted);font-size:11.5px;line-height:1.45;font-variant-numeric:tabular-nums;}
+  #listPanel td.ops{grid-area:ops;justify-self:end;display:flex;gap:6px;text-align:left;}
+  #listPanel td.ops .btn{padding:4px 9px;font-size:11px;line-height:1.3;}
+  tfoot tr{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:11px 13px;background:var(--accent-soft);border-radius:9px;font-size:13.5px;
+  }
+  tfoot td{border:0;padding:0;}
+  tfoot tr td:last-child{display:none;}
+  .list-more{width:100%;margin-top:8px;padding:11px;}
+  #listPanel .toolbar{gap:6px;margin-bottom:10px;}
+  #listPanel .toolbar select,#listPanel .toolbar input{padding:7px 9px;font-size:12.5px;flex:1 1 44%;}
+  #listPanel .toolbar input[type="search"]{flex:1 1 100%;}
+  #listPanel .toolbar .btn{padding:7px 11px;font-size:12px;flex:1 1 auto;}
+
+  /* 浮動按鈕 */
+  .fab{
+    display:block;position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));
+    width:56px;height:56px;border-radius:50%;border:0;z-index:50;cursor:pointer;
+    background:var(--accent);color:#fff;font-size:26px;line-height:1;
+    box-shadow:0 10px 24px -8px rgba(15,92,99,.75);
+  }
+  .fab:active{background:#0b4a50;transform:scale(.97);}
+  body.locked .fab{display:none;}
+}
 </style>
 </head>
 <body>
@@ -458,7 +603,7 @@ body.locked{overflow:hidden;}
         <p class="sub">隨手記一筆 · 月底不心慌 · 資料只留在你自己的裝置</p>
       </div>
     </div>
-    <div class="mast-actions">
+    <div class="mast-actions" id="mastActions">
       <button class="btn book-pill" id="btnBooks" type="button" title="切換帳本／新增帳本">
         <span id="curBookName">我的日常帳</span>
       </button>
@@ -466,6 +611,7 @@ body.locked{overflow:hidden;}
       <button class="btn" id="btnExportTxt" type="button">匯出 TXT</button>
       <button class="btn" id="btnBackup" type="button">備份 JSON</button>
       <button class="btn" id="btnRestore" type="button">還原備份</button>
+      <button class="btn only-mobile" id="btnMastMore" type="button" aria-label="更多動作" aria-expanded="false">⋯</button>
       <input type="file" id="restoreInput" accept="application/json,.json" hidden>
     </div>
   </header>
@@ -504,7 +650,7 @@ body.locked{overflow:hidden;}
     </article>
   </section>
   <p class="scope">目前統計範圍：<b id="scopeHint">全部紀錄</b><span>（變更下方篩選條件即同步更新）</span></p>
-  <div class="scope-row">
+  <div class="scope-row" id="scopeRow">
     <span class="seg" id="scopeSeg" role="group" aria-label="統計範圍">
       <button type="button" data-scope="book" class="on">本帳</button>
       <button type="button" data-scope="all">全部帳本</button>
@@ -512,8 +658,13 @@ body.locked{overflow:hidden;}
     <span id="scopeBookHint">只看本帳；切到「全部帳本」可看合計</span>
   </div>
 
+  <!-- 手機專用：統計細項收折 -->
+  <button class="more-toggle only-mobile" id="btnMoreStats" type="button" aria-expanded="false">
+    <span>預算・趨勢・類別佔比</span><b>展開</b>
+  </button>
+
   <!-- ===== 本月預算與近六個月趨勢 ===== -->
-  <section class="panel">
+  <section class="panel m-block" id="budgetPanel">
     <div class="panel-head">
       <h2>本月預算與花費節奏</h2>
       <p class="note">預算只看「本月」，不隨下方篩選變動；趨勢會套用類別與關鍵字篩選</p>
@@ -547,7 +698,7 @@ body.locked{overflow:hidden;}
   </section>
 
   <!-- ===== 新增一筆 ===== -->
-  <section class="panel">
+  <section class="panel" id="addPanel">
     <div class="panel-head">
       <h2>記一筆消費</h2>
       <p class="note">日期預設為今天，金額單位為新台幣元</p>
@@ -588,12 +739,14 @@ body.locked{overflow:hidden;}
   </section>
 
   <!-- ===== 發票 / 收據自動入帳 ===== -->
-  <section class="panel">
+  <section class="panel" id="invoicePanel">
     <div class="panel-head">
       <h2>拍一張就好：發票／收據自動入帳</h2>
       <p class="note">電子發票掃 QR，紙本收據讀文字，金額仍可手動修正</p>
+      <button class="btn tiny only-mobile" id="btnInvToggle" type="button" aria-expanded="false">展開</button>
     </div>
 
+    <div id="invBody">
     <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="上傳或拖放發票圖片">
       <div class="dz-title">把發票或收據拖進來，或點這裡選檔</div>
       <div class="dz-hint">電子發票證明聯的照片、手機截圖、財政部寄來的電子發票 PDF 都支援；也可 Ctrl+V 直接貼上</div>
@@ -687,10 +840,11 @@ body.locked{overflow:hidden;}
         </div>
       </div>
     </details>
+    </div>
   </section>
 
   <!-- ===== 紀錄清單 ===== -->
-  <section class="panel">
+  <section class="panel" id="listPanel">
     <div class="panel-head">
       <h2>消費紀錄</h2>
       <p class="note" id="listNote"></p>
@@ -718,10 +872,11 @@ body.locked{overflow:hidden;}
       <b>還沒有任何紀錄</b>
       在上面填一筆消費，就會出現在這裡。
     </div>
+    <button class="btn only-mobile list-more" id="btnListMore" type="button" hidden>顯示更多</button>
   </section>
 
   <!-- ===== 分類佔比 ===== -->
-  <section class="panel">
+  <section class="panel m-block" id="barsPanel">
     <div class="panel-head">
       <h2>類別佔比</h2>
       <p class="note">依目前篩選結果計算</p>
@@ -730,7 +885,13 @@ body.locked{overflow:hidden;}
     <p class="scope" id="barsEmpty" style="margin-bottom:0" hidden>目前沒有可以統計的資料。</p>
   </section>
 
-  <!-- ===== 專題說明 ===== -->
+  <!-- ===== 關於頁（獨立頁面，主頁不再佔用版面） ===== -->
+  <div class="books-page" id="aboutPage" hidden>
+    <div class="bk-shell">
+      <div class="bk-head">
+        <button class="btn tiny" id="btnAboutBack" type="button">← 回記帳</button>
+        <h2>關於這個工具</h2>
+      </div>
   <section class="panel">
     <div class="panel-head">
       <h2>作品說明</h2>
@@ -766,6 +927,16 @@ body.locked{overflow:hidden;}
         </ul>
       </div>
       <div>
+        <h3>手機使用</h3>
+        <ul>
+          <li>手機上會自動重排：「記一筆」排到最前面，打開就能填，不用先往下滑</li>
+          <li>右下角固定有「＋」圓鈕，點開是最小表單（金額、類別、日期、備註），三步記完；上方還會列出你最常用的類別，點一下直接帶入</li>
+          <li>明細一次先顯示 8 筆，要往下看按「顯示更多」，每按一次再加 8 筆</li>
+          <li>預算進度、六個月趨勢與類別佔比收在「詳細統計」裡，要看時再展開</li>
+          <li>發票／收據區預設收起，要掃描時按「展開」</li>
+          <li>匯出 CSV／TXT 與備份、還原收在標頭右上角的「⋯」</li>
+          <li>作品說明（這一頁）從頁尾「關於這個工具」或書架頁右上角進入</li>
+        </ul>
         <h3>技術與資料</h3>
         <p>單一 HTML 檔案，內含 HTML、CSS 與原生 JavaScript，不使用框架或建置工具，也不需要伺服器：用瀏覽器打開就能跑。</p>
         <p>發票辨識的兩條路線：QR 用瀏覽器原生 <code>BarcodeDetector</code>，不支援時以 <code>jsQR</code> 備援，並會把圖片旋轉 90／180／270 度重試；紙本收據用 <code>Tesseract.js</code> 做正體中文文字辨識；PDF 電子發票用 <code>pdf.js</code> 轉成影像後再掃 QR。以上都在瀏覽器本機執行，發票圖片不會上傳到任何伺服器。</p>
@@ -798,10 +969,13 @@ body.locked{overflow:hidden;}
       </div>
     </details>
   </section>
+    </div>
+  </div>
 
   <footer>
     <span>生活記帳簿 · 單頁網頁應用 · HTML / CSS / JavaScript</span>
     <span>資料存於本機瀏覽器</span>
+    <button class="foot-link" id="btnAbout" type="button">關於這個工具</button>
     <span>MIT 授權：任何人可自由下載、修改、再散布，只需保留授權聲明</span>
   </footer>
 </div>
@@ -846,6 +1020,7 @@ body.locked{overflow:hidden;}
     <div class="bk-head">
       <button class="btn tiny" id="btnBooksBack" type="button">← 回記帳</button>
       <h2>我的帳本</h2>
+      <button class="btn tiny" id="btnBooksAbout" type="button">關於</button>
       <button class="btn primary tiny" id="btnNewBook" type="button">＋ 新帳本</button>
     </div>
     <p class="bk-sub" id="booksSummary">—</p>
@@ -914,6 +1089,41 @@ body.locked{overflow:hidden;}
   </form>
 </dialog>
 
+<!-- ===== 手機快速記帳（浮動按鈕＋底部面板） ===== -->
+<button class="fab" id="btnFab" type="button" aria-label="快速記一筆">＋</button>
+
+<div class="sheet" id="quickSheet" hidden>
+  <div class="sheet-bd" id="sheetBd"></div>
+  <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-head">
+      <h3 id="sheetTitle">快速記一筆</h3>
+      <button class="btn tiny" id="btnSheetClose" type="button">關閉</button>
+    </div>
+    <form id="sheetForm" autocomplete="off">
+      <div class="field">
+        <label for="qAmount">金額（元）</label>
+        <input id="qAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required>
+      </div>
+      <div class="chips" id="qChips"><span class="lbl">常用類別</span></div>
+      <div class="field">
+        <label for="qCat">類別</label>
+        <input id="qCat" list="catList" maxlength="12" placeholder="例：餐飲" required>
+      </div>
+      <div class="sheet-row">
+        <div class="field">
+          <label for="qDate">日期</label>
+          <input type="date" id="qDate">
+        </div>
+        <div class="field">
+          <label for="qNote">備註（選填）</label>
+          <input id="qNote" maxlength="60" placeholder="例：午餐便當">
+        </div>
+      </div>
+      <button class="btn primary sheet-submit" type="submit">記下這筆</button>
+    </form>
+  </div>
+</div>
+
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -961,6 +1171,12 @@ body.locked{overflow:hidden;}
   var records = [];            // 目前帳本的紀錄（會跟著帳本切換）
   var editingId = null;
   var filter = { month: "all", cat: "all", q: "" };
+  var listLimit = 8;          // 手機一次顯示幾筆，按「顯示更多」再加 8
+
+  function isMobile() {
+    if (window.matchMedia) return window.matchMedia("(max-width:560px)").matches;
+    return window.innerWidth <= 560;
+  }
 
   /* ---------- 通用小工具 ---------- */
   function $(id) { return document.getElementById(id); }
@@ -1313,9 +1529,10 @@ body.locked{overflow:hidden;}
     scope.unshift((curBook() ? "「" + curBook().name + "」" : "") + (statsScope === "all" ? "全部帳本" : "本帳"));
     $("scopeHint").textContent = scope.join(" · ");
 
-    // 表格
+    // 表格（手機只先給前 listLimit 筆，避免一次落落長）
+    var shown = (isMobile() && list.length > listLimit) ? list.slice(0, listLimit) : list;
     var tbody = $("tbody");
-    tbody.innerHTML = list.map(function (r) {
+    tbody.innerHTML = shown.map(function (r) {
       return '<tr data-id="' + esc(r.id) + '">' +
         '<td class="date">' + esc(r.date) + "</td>" +
         '<td class="cat"><span>' + esc(r.cat) + "</span></td>" +
@@ -1330,13 +1547,21 @@ body.locked{overflow:hidden;}
         "</td></tr>";
     }).join("");
 
-    var hasRows = list.length > 0;
-    $("emptyState").hidden = hasRows;
+    var hasRows = shown.length > 0;
+    $("emptyState").hidden = list.length > 0;
     $("tfoot").hidden = !hasRows;
     $("footSum").textContent = money(bookStats.total);
     $("listNote").textContent = records.length
-      ? "「" + ((curBook() && curBook().name) || "本帳") + "」共 " + records.length + " 筆，目前顯示 " + list.length + " 筆"
+      ? "「" + ((curBook() && curBook().name) || "本帳") + "」共 " + records.length + " 筆，目前顯示 " + shown.length + " 筆"
       : "";
+
+    // 「顯示更多」只在手機、且還有沒顯示的筆數時出現
+    var moreBtn = $("btnListMore");
+    if (moreBtn) {
+      var rest = list.length - shown.length;
+      moreBtn.hidden = !(isMobile() && rest > 0);
+      moreBtn.textContent = "顯示更多（還有 " + rest + " 筆）";
+    }
 
     // 佔比
     var bars = $("bars");
@@ -1417,14 +1642,21 @@ body.locked{overflow:hidden;}
   });
 
   /* ---------- 篩選事件 ---------- */
-  $("fltMonth").addEventListener("change", function () { filter.month = this.value; render(); });
-  $("fltCat").addEventListener("change", function () { filter.cat = this.value; render(); });
-  $("fltQuery").addEventListener("input", function () { filter.q = this.value; render(); });
+  $("fltMonth").addEventListener("change", function () { filter.month = this.value; listLimit = 8; render(); });
+  $("fltCat").addEventListener("change", function () { filter.cat = this.value; listLimit = 8; render(); });
+  $("fltQuery").addEventListener("input", function () { filter.q = this.value; listLimit = 8; render(); });
   $("btnReset").addEventListener("click", function () {
     filter = { month: "all", cat: "all", q: "" };
+    listLimit = 8;
     $("fltMonth").value = "all";
     $("fltCat").value = "all";
     $("fltQuery").value = "";
+    render();
+  });
+
+  /* ---------- 手機「顯示更多」 ---------- */
+  $("btnListMore").addEventListener("click", function () {
+    listLimit += 8;
     render();
   });
 
@@ -3102,8 +3334,9 @@ body.locked{overflow:hidden;}
   });
 
   window.addEventListener("hashchange", function () {
-    if (/^#\/books/.test(location.hash)) openBooks();
-    else closeBooks();
+    if (/^#\/books/.test(location.hash)) { closeAbout(); openBooks(); }
+    else if (/^#\/about/.test(location.hash)) openAbout();
+    else { closeBooks(); closeAbout(); }
   });
 
   /* ---------- 事件綁定 ---------- */
@@ -3167,6 +3400,131 @@ body.locked{overflow:hidden;}
     toast("好，三天內不再提醒");
   });
 
+  /* ==================================================================
+     ⑥ 手機版：浮動快速記帳、收折、關於頁
+     ================================================================== */
+
+  function renderQChips() {
+    var box = $("qChips");
+    if (!box) return;
+    var counter = {};
+    records.forEach(function (r) { counter[r.cat] = (counter[r.cat] || 0) + 1; });
+    var cats = Object.keys(counter).sort(function (a, b) { return counter[b] - counter[a]; }).slice(0, 6);
+    if (!cats.length) cats = DEFAULT_CATS.slice(0, 6);
+    box.innerHTML = '<span class="lbl">常用類別</span>' + cats.map(function (c) {
+      return '<button class="chip" type="button" data-cat="' + esc(c) + '">' + esc(c) + "</button>";
+    }).join("");
+  }
+
+  function openQuick() {
+    if (!$("quickSheet").hidden) return;
+    renderQChips();
+    $("qDate").value = todayStr();
+    $("qAmount").value = "";
+    $("qCat").value = "";
+    $("qNote").value = "";
+    $("quickSheet").hidden = false;
+    document.body.classList.add("locked");
+    setTimeout(function () { try { $("qAmount").focus(); } catch (e) {} }, 80);
+  }
+
+  function closeQuick() {
+    $("quickSheet").hidden = true;
+    document.body.classList.remove("locked");
+  }
+
+  function openAbout() {
+    if ($("booksPage").hidden === false) closeBooks();
+    $("aboutPage").hidden = false;
+    document.body.classList.add("locked");
+    $("aboutPage").scrollTop = 0;
+    if (location.hash !== "#/about") history.replaceState(null, "", "#/about");
+  }
+
+  function closeAbout() {
+    $("aboutPage").hidden = true;
+    document.body.classList.remove("locked");
+    if (location.hash === "#/about") history.replaceState(null, "", location.pathname + location.search);
+  }
+
+  /* ---------- 事件綁定（手機版 UI） ---------- */
+  $("btnFab").addEventListener("click", openQuick);
+  $("btnSheetClose").addEventListener("click", closeQuick);
+  $("sheetBd").addEventListener("click", closeQuick);
+
+  $("qChips").addEventListener("click", function (ev) {
+    var b = ev.target.closest ? ev.target.closest(".chip") : null;
+    if (!b) return;
+    $("qCat").value = b.getAttribute("data-cat");
+    try { $("qAmount").focus(); } catch (e) {}
+  });
+
+  $("sheetForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var amount = parseFloat($("qAmount").value);
+    var cat = $("qCat").value.trim();
+    var date = $("qDate").value || todayStr();
+    var note = $("qNote").value.trim();
+
+    if (!cat) { toast("請填類別，或點上面的常用類別"); return; }
+    if (!isFinite(amount) || amount <= 0) { toast("金額要填大於 0 的數字"); return; }
+    if (date > todayStr()) { toast("日期不可晚於今天"); return; }
+
+    records.push({
+      id: uid(),
+      date: date,
+      cat: cat,
+      amount: Math.round(amount * 100) / 100,
+      note: note
+    });
+    save();
+    closeQuick();
+    fillSelects();
+    render();
+    checkBudgetAlert();
+    toast("已記下：" + cat + " " + money(amount) + " 元");
+  });
+
+  // 標頭「⋯」：手機才把匯出／備份收起來
+  $("btnMastMore").addEventListener("click", function () {
+    var open = $("mastActions").classList.toggle("more-open");
+    this.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  // 發票區在手機上預設收起
+  $("btnInvToggle").addEventListener("click", function () {
+    var open = $("invoicePanel").classList.toggle("open");
+    this.textContent = open ? "收起" : "展開";
+    this.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  // 詳細統計收折
+  $("btnMoreStats").addEventListener("click", function () {
+    var open = document.body.classList.toggle("mstats-open");
+    this.setAttribute("aria-expanded", open ? "true" : "false");
+    this.querySelector("b").textContent = open ? "收起" : "展開";
+  });
+
+  // 關於頁
+  $("btnAbout").addEventListener("click", openAbout);
+  $("btnAboutBack").addEventListener("click", closeAbout);
+  $("btnBooksAbout").addEventListener("click", openAbout);
+
+  // 視窗跨過手機／桌機界線時重畫（例如轉向）
+  var resizeTimer = null;
+  window.addEventListener("resize", function () {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      if (!$("quickSheet").hidden) return;
+      render();
+    }, 160);
+  });
+
+  // Esc 關閉快速記帳面板
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape" && !$("quickSheet").hidden) closeQuick();
+  });
+
   /* ---------- 啟動 ---------- */
   function init() {
     loadPrefs();
@@ -3178,6 +3536,7 @@ body.locked{overflow:hidden;}
     render();
     renderMigrateBar();
     if (/^#\/books/.test(location.hash)) openBooks();
+    else if (/^#\/about/.test(location.hash)) openAbout();
   }
 
   init();
