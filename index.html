@@ -221,6 +221,16 @@ tfoot .sum{text-align:right;color:var(--accent);font-size:16px;}
   .parse-fields{grid-template-columns:1fr 1fr;width:100%;}
 }
 .parse-fields .field.sp{grid-column:1 / -1;}
+.amt-cands{display:flex;flex-wrap:wrap;gap:6px;}
+.amt-cand{
+  font:inherit;font-size:12.5px;padding:5px 10px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--line-strong);background:#fff;color:var(--ink-soft);
+  display:inline-flex;align-items:center;gap:6px;min-width:0;
+}
+.amt-cand:hover{border-color:var(--accent);color:var(--accent);}
+.amt-cand.on{background:var(--accent-soft);border-color:var(--accent);color:#0d4d53;}
+.amt-cand .why{font-size:10.5px;color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.amt-cand.on .why{color:#0d4d53;opacity:.75;}
 .parse-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);}
 .parse-foot .warn{font-size:12.5px;color:var(--rust);flex:1 1 220px;min-width:0;}
 .badge-ev{
@@ -325,6 +335,7 @@ dialog::backdrop{background:rgba(32,32,28,.35);backdrop-filter:blur(2px);}
   padding:10px 14px;margin-bottom:16px;font-size:12.5px;color:#6b5417;line-height:1.6;
 }
 .notice-bar .txt{flex:1 1 220px;min-width:0;}
+.notice-bar[hidden]{display:none;}
 .quick-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;}
 .quick-hint{font-size:11.5px;color:var(--muted);}
 .chip.quick{background:#f0ece0;color:#5b5546;font-variant-numeric:tabular-nums;}
@@ -501,6 +512,10 @@ footer{
             <label for="pvAmount">金額（元）</label>
             <input type="number" id="pvAmount" min="0.01" step="0.01" required>
           </div>
+          <div class="field sp" id="amtCandsWrap" hidden>
+            <label>系統抓到的金額候選（不確定就點一個套用）</label>
+            <div class="amt-cands" id="amtCands"></div>
+          </div>
           <div class="field">
             <label for="pvName">店家／品項</label>
             <input id="pvName" maxlength="40" placeholder="例：全家便利商店">
@@ -531,7 +546,9 @@ footer{
 
     <p class="notice">
       判讀順序：先找電子發票證明聯上的 QR Code（可直接取得發票號碼、開立日期與含稅總額，準確度最高）；
-      沒掃到 QR 才改用文字辨識（OCR），並從「總計／合計／應付／結帳金額」等關鍵字附近抓金額。
+      沒掃到 QR 才改用文字辨識（OCR）。辨識前會先把日期、時間、統編、電話、發票號碼遮掉，
+      再依「離總計類關鍵字多近」、「數字是否在行末」、「後面有沒有『元』」逐個評分，
+      只把分數最高的當金額，並列出前 3 名候選讓你一鍵改選。
       兩者都只是輔助，最後一定要由你確認，避免記錯帳。
     </p>
 
@@ -615,6 +632,7 @@ footer{
         <ul>
           <li>新增消費：日期、類別、金額、備註，含輸入驗證</li>
           <li>發票／收據自動入帳：照片、截圖、財政部寄來的電子發票 PDF 都吃，先掃 QR，沒有 QR 才用文字辨識</li>
+          <li>金額智慧判讀：先遮掉日期、統編、電話等非金額數字，再逐個數字評分取最可能的總額，並提供前 3 名候選一鍵套用</li>
           <li>電子發票專屬處理：讀出字軌號碼、開立日期、隨機碼、賣方統編，自動算期別，並擋重複入帳</li>
           <li>QR 拍不清時可手動輸入字軌號碼與開立日期，走同一套確認流程</li>
           <li>一律經人工確認才寫入，金額、類別、店家都可以改</li>
@@ -642,7 +660,8 @@ footer{
           <li>清除瀏覽器資料或使用無痕模式，紀錄會消失</li>
           <li>QR 只支援台灣電子發票證明聯；傳統手寫收據只能靠 OCR 或手動輸入</li>
           <li>「載具（手機條碼）自動匯入」需要後端與財政部電子發票平台 API 授權，純前端做不到，目前未實作</li>
-          <li>OCR 第一次使用要下載模型，需連網；字跡模糊、反光時金額可能讀錯，務必確認</li>
+          <li>OCR 第一次使用要下載模型，需連網；版面太亂、反光、字跡模糊時金額仍可能讀錯，請用候選金額或自行修正</li>
+          <li>OCR 只跑 PDF 的第一頁；多頁明細需自行翻頁或手動輸入</li>
           <li>憑證縮圖存在瀏覽器內，容量約 5MB，滿了只保留帳目、捨棄圖片</li>
           <li>備份檔存在你自己的裝置或雲端硬碟，網站沒有伺服器，無法代為保管</li>
           <li>預算以「本月」計算，不隨篩選條件變動；趨勢則會套用類別與關鍵字篩選</li>
@@ -1401,8 +1420,28 @@ footer{
     return found;
   }
 
-  /* ---------- OCR（Tesseract.js，正體中文＋英文） ---------- */
-  async function runOCR(file, onProgress) {
+  /* ---------- OCR（Tesseract.js，正體中文＋英文） ----------
+     收據常見問題：解析度不足、對比太低、欄位太擠。
+     先放大到至少 1500px 寬、轉灰階並拉高對比，再交給 Tesseract，
+     並改用「單欄、字級不一」的分頁模式，比預設模式更適合收據。
+  ------------------------------------------------------------ */
+  function prepOcrCanvas(src) {
+    var w = src.width || 0, h = src.height || 0;
+    if (!w || !h) return src;
+
+    var scale = Math.min(2.2, Math.max(1, 1500 / w));
+    var c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(w * scale));
+    c.height = Math.max(1, Math.round(h * scale));
+
+    var ctx = c.getContext("2d");
+    try { ctx.filter = "grayscale(1) contrast(1.35) brightness(1.04)"; } catch (e) {}
+    ctx.drawImage(src, 0, 0, c.width, c.height);
+    try { ctx.filter = "none"; } catch (e) {}
+    return c;
+  }
+
+  async function runOCR(src, onProgress) {
     try {
       if (!window.Tesseract) {
         await loadScript("https://fastly.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js");
@@ -1417,91 +1456,261 @@ footer{
         }
       }
     });
-    var out = await worker.recognize(file);
+
+    try {
+      await worker.setParameters({
+        tessedit_pageseg_mode: "4",        // 假設一張圖是「單欄、字級不一」的區塊
+        preserve_interword_spaces: "1"
+      });
+    } catch (e) { /* 舊版 Tesseract 不支援就算了 */ }
+
+    var out = await worker.recognize(prepOcrCanvas(src));
     await worker.terminate();
     return (out && out.data && out.data.text) || "";
   }
 
-  /* ---------- 從收據文字猜金額、日期、店名 ---------- */
-  var AMT_KEY = /(總計|總額|合計|應付|應繳|實付|實收|結帳|消費金額|發票金額|小計|TOTAL|Total|AMOUNT|Amount)/;
-  var AMT_MAIN = /(總計|總額|應付|應繳|實付|結帳|消費金額|發票金額|TOTAL|Total|AMOUNT|Amount)/;
-  var NOISE_LINE = /(統編|統一編號|電話|TEL|TAX ID|日期|時間|發票|載具|載具號碼|http|www|營業人|簽章)/;
-  var NUM_RE = /\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+\.\d{1,2}|\d{2,6}/;
+  /* ---------- 從收據文字推估金額、日期、店名（重新設計） ----------
+     舊版為什麼會抓錯：
+       1) 沒有先把「日期／時間／發票號碼／電話／統編」這類不是金額的數字遮掉，
+          NUM_RE 連 4 碼年份（2026）都會抓到。
+       2) 找不到「總計」關鍵字時，直接取全文最大的數字，
+          於是 2026（年份）、24536838（統編）都可能贏過真正的 55 元。
+       3) 只取「關鍵字後第一個數字」，同一行有稅額、折扣時會誤抓。
+       4) 日期是全文第一個長得像日期的字串，沒有排除未來日期與不合理年份。
+
+     新版做法：
+       ① 先正規化（全形數字、被 OCR 拆開的數字）並遮掉非金額數字。
+       ② 逐行、逐個數字評分：離它最近的前方關鍵字是「總計類」才加分，
+          「小計／稅額／現金／找零／折扣／點數」一律扣分；
+          行末的數字、後面帶「元／NT$」的數字加分；4 碼年份、7 碼以上編號扣分。
+       ③ 同一個金額只留最高分，排序後保留前 3 名給使用者一鍵改選。
+       ④ 日期獨立評分：帶「日期／開立／交易」字樣加分、排除未來日期。
+  ------------------------------------------------------------ */
+
+  /* >>> RECEIPT-PARSER-START >>> */
+
+  var TOTAL_STRONG = /(總計|總額|總金額|合計|合計金額|應付|應繳|實付|實收|結帳|結帳金額|消費金額|發票金額|付款金額|TOTAL|GRANDTOTAL|AMOUNTDUE|AMOUNT)/i;
+  var AMT_SUB_KEY = /(小計|稅額|營業稅|稅金|現金|找零|折扣|優惠|折抵|點數|紅利|餘額|儲值|運費|外送費|服務費|CASH|CHANGE|TAX|DISCOUNT|POINTS|BALANCE|SUBTOTAL)/i;
+  var AMT_NOISE = /(統編|統一編號|電話|TEL|TAXID|載具|會員|卡號|字軌|隨機碼|交易序號|機台|收銀|店號|營業人|簽章|網址|HTTP|WWW|期別|發票號|INVOICE|RECEIPT|ORDER|單號|桌號|人數|張數|件數|數量|單價)/i;
+  var NUM_TOKEN = "(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?:\\.\\d{1,2})?";
+  var KW_SCAN = /(總計|總額|總金額|合計|應付|應繳|實付|實收|結帳|消費金額|發票金額|付款金額|小計|稅額|營業稅|稅金|現金|找零|折扣|優惠|折抵|點數|紅利|餘額|儲值|運費|外送費|服務費|TOTAL|AMOUNT|CASH|CHANGE|TAX|DISCOUNT|POINTS|SUBTOTAL)/gi;
 
   function toNumber(s) {
     var n = parseFloat(String(s).replace(/,/g, ""));
     return isFinite(n) ? n : null;
   }
 
-  function parseReceiptText(text) {
-    var result = {
-      source: "OCR", text: text || "", amount: null, date: "",
-      name: "", items: [], itemText: "", invoiceNo: ""
-    };
+  function pad2(n) { return String(n).padStart(2, "0"); }
 
-    var raw = String(text || "");
+  /* 把民國年／兩位年份轉成四位數西元，並擋掉不合理年份 */
+  function fixYear(y) {
+    y = parseInt(y, 10);
+    if (!isFinite(y)) return 0;
+    if (y < 100) return y + 2000;
+    if (y < 1911) return y + 1911;
+    return y;
+  }
+
+  function isRealDate(iso) {
+    var p = String(iso).split("-");
+    if (p.length !== 3) return false;
+    var d = new Date(iso + "T00:00:00");
+    return d.getFullYear() === parseInt(p[0], 10) &&
+           d.getMonth() + 1 === parseInt(p[1], 10) &&
+           d.getDate() === parseInt(p[2], 10);
+  }
+
+  /* OCR 常把全形字、逗號、破折號認錯，先把字元與被拆開的數字接回來 */
+  function normalizeOcrText(s) {
+    var t = String(s || "")
+      .replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 65248); })
+      .replace(/[Ａ-Ｚａ-ｚ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 65248); })
+      .replace(/，/g, ",").replace(/．/g, ".").replace(/。/g, ".")
+      .replace(/：/g, ":").replace(/－|–|—|‐/g, "-")
+      .replace(/\u00a0/g, " ");
+
+    // 「1 2 0」「55 0」這種被 OCR 拆開的數字，接回成 120、550
+    for (var i = 0; i < 2; i++) t = t.replace(/(\d)\s+(\d)/g, "$1$2");
+    return t;
+  }
+
+  /* 遮掉「一定不是金額」的數字：日期、時間、發票號、電話、期別 */
+  function maskNonAmount(line) {
+    return String(line)
+      .replace(/\d{2,4}\s*[年\/\-\.]\s*\d{1,2}\s*[月\/\-\.]\s*\d{1,2}\s*日?/g, " <日> ")
+      .replace(/\d{1,2}:\d{2}(?::\d{2})?/g, " <時> ")
+      .replace(/[A-Z]{2}[-\s]?\d{8}/g, " <票> ")
+      .replace(/0\d{1,2}[-\s]?\d{3,4}[-\s]?\d{3,4}/g, " <話> ")
+      .replace(/\d{2,3}\s*年\s*\d{1,2}\s*[-\/]\s*\d{1,2}\s*月/g, " <期> ");
+  }
+
+  function lineAt(text, index) {
+    var start = text.lastIndexOf("\n", index - 1) + 1;
+    var end = text.indexOf("\n", index);
+    if (end === -1) end = text.length;
+    return text.slice(start, end).trim();
+  }
+
+  /* 逐行、逐個數字評分，回傳排序後的候選清單 */
+  function collectAmountCandidates(lines) {
+    var cands = [];
+    var tailFrom = Math.max(0, lines.length - 8);
+
+    lines.forEach(function (line, idx) {
+      var flat = line.replace(/\s+/g, "");
+      var strongLine = TOTAL_STRONG.test(flat);
+      var noisyLine = AMT_NOISE.test(flat) && !strongLine;
+
+      var masked = maskNonAmount(line);
+
+      // 這一行裡每個關鍵字的位置與類型（總計類 or 小計／稅額類）
+      var kws = [], km, kre = new RegExp(KW_SCAN.source, "gi");
+      while ((km = kre.exec(masked)) !== null) {
+        kws.push({ index: km.index, strong: TOTAL_STRONG.test(km[0]) });
+      }
+
+      // 抓出所有數字與它們的位置
+      var toks = [], tm, tre = new RegExp(NUM_TOKEN, "g");
+      while ((tm = tre.exec(masked)) !== null) {
+        toks.push({ text: tm[0], index: tm.index });
+      }
+
+      function nearestKw(pos) {
+        var best = null;
+        for (var i = 0; i < kws.length; i++) {
+          if (kws[i].index <= pos) best = kws[i];
+          else break;
+        }
+        return best;
+      }
+
+      toks.forEach(function (tk, ti) {
+        var v = toNumber(tk.text);
+        if (v === null || v <= 0 || v > 300000) return;
+
+        var score = 0;
+        var kw = nearestKw(tk.index);
+
+        if (kw) score += kw.strong ? 70 : -32;
+        else if (strongLine) score += 24;
+        if (noisyLine) score -= 45;
+
+        // 後面緊接「元／NT$」的，幾乎確定是金額
+        var tail = masked.slice(tk.index + tk.text.length, tk.index + tk.text.length + 5);
+        if (/元|NT|TWD|\$/.test(tail)) score += 10;
+        if (/\.\d/.test(tk.text)) score += 5;
+
+        // 個位數多半是數量、折扣％數，不是單價
+        if (v <= 9 && !(kw && kw.strong)) score -= 10;
+
+        // 4 碼的 1990～2100 多半是年份，不是金額
+        if (tk.text.indexOf(".") === -1 && tk.text.length === 4 && v >= 1990 && v <= 2100) score -= 42;
+
+        // 7 碼以上的整數多半是統編、卡號、流水號
+        if (tk.text.replace(/,/g, "").length >= 7) score -= 32;
+
+        if (idx < 3) score -= 8;              // 表頭
+        if (idx >= tailFrom) score += 8;      // 收據的總計通常在最後幾行
+
+        // 金額一般印在行末；但同一行還有稅額／找零時，行末那個不能加分
+        if (ti === toks.length - 1 && !(kw && !kw.strong)) score += (kw && kw.strong) ? 12 : 6;
+
+        cands.push({ value: v, score: score, line: String(line).trim().slice(0, 26), idx: idx });
+      });
+    });
+
+    // 同一個金額只留最高分，再依分數排序
+    var byVal = {};
+    cands.forEach(function (c) {
+      var k = c.value.toFixed(2);
+      if (!byVal[k] || byVal[k].score < c.score) byVal[k] = c;
+    });
+
+    return Object.keys(byVal).map(function (k) { return byVal[k]; })
+      .sort(function (a, b) { return b.score - a.score || b.value - a.value; });
+  }
+
+  /* 日期候選：關鍵字加分、未來日期不採用 */
+  function collectDateCandidates(text) {
+    var out = [], m;
+    var todayMs = Date.parse(todayStr());
+    var thisYear = new Date().getFullYear();
+    var re = /(\d{2,4})\s*[年\/\-\.]\s*(\d{1,2})\s*[月\/\-\.]\s*(\d{1,2})\s*日?/g;
+
+    while ((m = re.exec(text)) !== null) {
+      var y = fixYear(m[1]);
+      var mo = parseInt(m[2], 10), dd = parseInt(m[3], 10);
+      if (!(y >= 2005 && y <= thisYear + 1)) continue;
+      if (!(mo >= 1 && mo <= 12 && dd >= 1 && dd <= 31)) continue;
+
+      var iso = y + "-" + pad2(mo) + "-" + pad2(dd);
+      if (!isRealDate(iso)) continue;
+
+      var ctx = lineAt(text, m.index);
+      var score = 0;
+      if (/(日期|消費日|交易|開立|時間|DATE)/i.test(ctx)) score += 20;
+      if (m.index < 80) score += 6;
+
+      var diff = (todayMs - Date.parse(iso)) / 86400000;
+      if (diff < 0) score -= 60;          // 未來日期：不採用
+      else if (diff < 45) score += 8;     // 近期的最像「這次消費」
+
+      if (score < 0) continue;            // 明顯不合理的日期直接丟掉
+      out.push({ date: iso, score: score });
+    }
+
+    return out.sort(function (a, b) { return b.score - a.score; });
+  }
+
+  function parseReceiptText(text) {
+    var raw = normalizeOcrText(text);
     var lines = raw.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
 
-    // 日期：民國或西元年
-    var dm = raw.match(/(\d{2,4})\s*[年\/\-\.]\s*(\d{1,2})\s*[月\/\-\.]\s*(\d{1,2})\s*日?/);
-    if (dm) {
-      var y = parseInt(dm[1], 10);
-      if (y < 1911) y += 1911;
-      else if (y < 100) y += 2000;
-      var mo = parseInt(dm[2], 10), dd = parseInt(dm[3], 10);
-      if (mo >= 1 && mo <= 12 && dd >= 1 && dd <= 31) {
-        result.date = y + "-" + String(mo).padStart(2, "0") + "-" + String(dd).padStart(2, "0");
-      }
-    }
+    var cands = collectAmountCandidates(lines);
+    // 分數為負的代表「一看就不像金額」（統編、載具、數量…），不自動填入，也不算候選
+    var usable = cands.filter(function (c) { return c.score >= 0; });
+    var best = usable[0] || null;
+    var conf = "low";
+    if (best) conf = best.score >= 65 ? "high" : (best.score >= 34 ? "medium" : "low");
 
-    // 金額：優先取「總計」類關鍵字後面的第一個數字，避免抓到現金、找零
-    var main = [], sub = [];
-    lines.forEach(function (line) {
-      if (!AMT_KEY.test(line)) return;
-      if (NOISE_LINE.test(line)) return;
-      var km = line.match(AMT_KEY);
-      var after = line.slice(km.index + km[0].length);
-      var nm = after.match(NUM_RE) || line.match(NUM_RE);
-      if (!nm) return;
-      var v = toNumber(nm[0]);
-      if (!v || v <= 0 || v > 999999) return;
-      (AMT_MAIN.test(line) ? main : sub).push(v);
-    });
-    var pool = main.length ? main : sub;
-    if (pool.length) {
-      result.amount = Math.max.apply(null, pool);
-    } else {
-      // 沒有關鍵字時：取全文中「像金額」的最大值（排除 7 位以上，多半是發票號碼）
-      var all = raw.match(/\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d+\.\d{1,2}|\d{2,6}/g) || [];
-      var cand = [];
-      all.forEach(function (t) {
-        var v = toNumber(t);
-        if (v && v >= 1 && v <= 200000) cand.push(v);
-      });
-      if (cand.length) result.amount = Math.max.apply(null, cand);
-    }
+    var dates = collectDateCandidates(raw);
 
-    // 店名：前幾行裡找帶店家字樣的
-    var NAME_KEY = /(公司|商行|商店|商號|超市|百貨|門市|餐|飲|咖啡|藥局|加油站|店|行|mart|MART|Store|STORE)/;
+    var result = {
+      source: "OCR",
+      text: raw,
+      amount: best ? best.value : null,
+      amountCandidates: usable.slice(0, 3),
+      amountConfidence: conf,
+      date: dates.length ? dates[0].date : "",
+      dateCandidates: dates.slice(0, 2),
+      name: "",
+      items: [],
+      itemText: "",
+      invoiceNo: ""
+    };
+
+    // 店名：前幾行找有店家字樣、且不含統編／電話／發票資訊的那一行
+    var NAME_KEY = /(公司|商行|商店|商號|超市|百貨|門市|餐|飲|咖啡|藥局|加油站|店|行|mart|MART|Store|STORE|SHOP)/;
     var name = "";
     for (var i = 0; i < Math.min(lines.length, 8); i++) {
       var l = lines[i].replace(/[^\u4e00-\u9fa5A-Za-z0-9（）()\-\.\s]/g, "").trim();
       if (l.length < 2 || l.length > 28) continue;
       if (/^[\d\s\-\.\/]+$/.test(l)) continue;
-      if (NOISE_LINE.test(l)) continue;
+      if (AMT_NOISE.test(l) || /日期|時間|歡迎|謝謝|明細|品名|數量|單價/.test(l)) continue;
       if (NAME_KEY.test(l)) { name = l; break; }
       if (!name && !/\d{4,}/.test(l)) name = l;
     }
     result.name = name;
 
-    // 畫面上若印了字軌號碼就直接抓
-    var im = raw.replace(/\s/g, "").match(/[A-Z]{2}\d{8}/);
-    if (im) result.invoiceNo = im[0];
+    // 字軌號碼：只認「2 英文字母 + 8 數字」且不在電話脈絡裡
+    var im = raw.replace(/\s/g, "").match(/([A-Z]{2}\d{8})/);
+    if (im) result.invoiceNo = im[1];
 
-    // 品項關鍵字整併，用來推測類別
     result.itemText = lines.slice(0, 12).join(" ").slice(0, 120);
     return result;
   }
+
+  /* <<< RECEIPT-PARSER-END <<< */
 
   /* ---------- 狀態列 ---------- */
   function setStatus(msg, cls) {
@@ -1574,7 +1783,10 @@ footer{
       }
       parsed = parseReceiptText(text);
       if (parsed.amount || parsed.date || parsed.name) {
-        setStatus("文字辨識完成，金額與日期請再確認一次。", "ok");
+        setStatus(parsed.amount && parsed.amountConfidence === "low"
+          ? "文字辨識完成，但金額把握不高，請用候選金額確認。"
+          : "文字辨識完成，金額與日期請再確認一次。",
+          parsed.amount && parsed.amountConfidence !== "low" ? "ok" : "");
       } else {
         setStatus("這張圖沒有辨識出可用的金額，請看縮圖手動填寫。", "err");
       }
@@ -1597,7 +1809,10 @@ footer{
       name: (known && known.name) || parsed.name || "",
       cat: (known && known.cat) || guessCat(parsed.name) || guessCat(parsed.itemText) || guessCat(parsed.text) || "",
       note: (parsed.itemText || "").slice(0, 60),
-      thumb: thumb || ""
+      thumb: thumb || "",
+      amountCandidates: parsed.amountCandidates || [],
+      amountConfidence: parsed.amountConfidence || "high",
+      amountSource: parsed.source
     };
     showDraft();
   }
@@ -1617,7 +1832,27 @@ footer{
     $("pvNote").value = draft.note;
     $("pvNo").value = draft.invoiceNo;
     var srcMap = { QR: "來源：電子發票 QR", OCR: "來源：文字辨識 OCR", MANUAL: "來源：手動輸入字軌" };
-    $("parseSrc").textContent = srcMap[draft.source] || "來源：未知";
+    var confMap = { high: "信心高", medium: "信心中", low: "信心低" };
+    $("parseSrc").textContent = (srcMap[draft.source] || "來源：未知") +
+      (draft.source === "OCR" && draft.amountConfidence ? " · " + confMap[draft.amountConfidence] : "");
+
+    // 金額候選：OCR 抓到多個可能金額時，讓人自己挑，而不是被單一錯誤答案綁住
+    var cs = draft.amountCandidates || [];
+    var shown = cs.filter(function (c, i) {
+      return c.value > 0 && (i === 0 || c.score >= 8);
+    });
+    if (draft.source === "OCR" && shown.length > 1) {
+      $("amtCandsWrap").hidden = false;
+      $("amtCands").innerHTML = shown.map(function (c, i) {
+        var tip = String(c.line || "").replace(/[<>&"]/g, "").slice(0, 16);
+        return '<button type="button" class="amt-cand' + (i === 0 ? " on" : "") +
+          '" data-amt="' + c.value + '">' + money(c.value) +
+          ' 元' + (tip ? '<span class="why">' + esc(tip) + '</span>' : "") + "</button>";
+      }).join("");
+    } else {
+      $("amtCandsWrap").hidden = true;
+      $("amtCands").innerHTML = "";
+    }
 
     // 電子發票的輔助資訊：期別、隨機碼、賣方統編
     var meta = [];
@@ -1627,9 +1862,17 @@ footer{
     if (draft.sellerId) meta.push("賣方統編 " + draft.sellerId);
     $("invMeta").textContent = meta.length ? meta.join("　·　") : "";
 
-    $("parseWarn").textContent = (draft.amount && draft.date)
-      ? "已自動填入，請核對金額與日期後入帳。"
-      : (draft.thumb ? "沒有完整辨識出金額或日期，請看縮圖補填。" : "請補上金額、店家與類別。");
+    var warnTxt;
+    if (draft.amount && draft.date) {
+      warnTxt = (draft.source === "OCR" && draft.amountConfidence === "low")
+        ? "金額抓得不太確定，請點選上方候選金額或自行修改。"
+        : "已自動填入，請核對金額與日期後入帳。";
+    } else if (draft.thumb) {
+      warnTxt = "沒有完整辨識出金額或日期，請看縮圖補填。";
+    } else {
+      warnTxt = "請補上金額、店家與類別。";
+    }
+    $("parseWarn").textContent = warnTxt;
     $("parseCard").setAttribute("data-open", "1");
     try { $("parseCard").scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e) {}
   }
@@ -1638,6 +1881,8 @@ footer{
     draft = null;
     $("parseCard").setAttribute("data-open", "0");
     $("pvThumb").removeAttribute("src");
+    $("amtCandsWrap").hidden = true;
+    $("amtCands").innerHTML = "";
   }
 
   function openEvidence(url) {
@@ -1702,6 +1947,17 @@ footer{
   }
 
   /* ---------- 事件綁定 ---------- */
+  $("amtCands").addEventListener("click", function (e) {
+    var btn = e.target.closest ? e.target.closest("button[data-amt]") : null;
+    if (!btn) return;
+    var v = parseFloat(btn.getAttribute("data-amt"));
+    if (!isFinite(v) || v <= 0) return;
+    $("pvAmount").value = v.toFixed(2);
+    var all = this.querySelectorAll(".amt-cand");
+    for (var i = 0; i < all.length; i++) all[i].classList.remove("on");
+    btn.classList.add("on");
+    toast("已套用金額 " + money(v) + " 元");
+  });
   $("btnPick").addEventListener("click", function () { $("fileInput").click(); });
   $("dropzone").addEventListener("click", function () { $("fileInput").click(); });
   $("dropzone").addEventListener("keydown", function (e) {
