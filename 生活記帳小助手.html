@@ -346,6 +346,100 @@ footer{
   margin-top:34px;padding-top:16px;border-top:1px solid var(--line);
   font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;
 }
+
+/* ============ 多帳本 ============ */
+body.locked{overflow:hidden;}
+
+/* 標頭上的帳本膠囊 */
+.book-pill{
+  background:var(--accent-soft);border-color:#c9ded9;color:#0d4d53;
+  font-weight:500;max-width:190px;
+}
+.book-pill:hover{background:#d7e7e5;border-color:var(--accent);color:var(--accent);}
+.book-pill span{display:inline-block;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom;}
+
+/* 統計範圍切換 */
+.scope-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-14px 0 22px;font-size:12.5px;color:var(--muted);}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;background:#fff;}
+.seg button{
+  font:inherit;font-size:12.5px;padding:5px 13px;border:0;background:transparent;
+  color:var(--ink-soft);cursor:pointer;transition:background .15s,color .15s;
+}
+.seg button.on{background:var(--accent);color:#f9f7f1;}
+.seg button:not(.on):hover{background:var(--accent-soft);color:var(--accent);}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
+
+/* 書架頁（全螢幕覆蓋） */
+.books-page{position:fixed;inset:0;z-index:60;background:var(--paper);overflow:auto;padding:22px 20px 44px;}
+.books-page[hidden]{display:none;}
+.bk-shell{max-width:980px;margin:0 auto;}
+.bk-head{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line-strong);
+}
+.bk-head h2{margin:0;font-size:22px;letter-spacing:.02em;flex:1 1 auto;min-width:0;}
+.bk-sub{margin:0 0 16px;font-size:12.5px;color:var(--muted);line-height:1.7;}
+
+.book-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+@media (max-width:900px){.book-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width:560px){.book-grid{grid-template-columns:1fr;} .books-page{padding:14px 12px 30px;}}
+
+.book-card{
+  position:relative;min-width:0;background:var(--paper-2);border:1px solid var(--line);
+  border-radius:var(--radius);padding:14px 15px 13px;box-shadow:var(--shadow);cursor:pointer;
+  transition:border-color .15s,transform .15s,box-shadow .15s;
+}
+.book-card:hover{border-color:var(--accent);transform:translateY(-1px);}
+.book-card.cur{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft),var(--shadow);}
+.book-card.arch{opacity:.62;}
+.book-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+.bk-top{display:flex;align-items:baseline;gap:8px;padding-right:24px;}
+.bk-top b{
+  font-size:16px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.bk-tag{flex:none;font-size:11px;padding:1px 8px;border-radius:999px;letter-spacing:.04em;}
+.t-daily{background:#e0eceb;color:#0d4d53;}
+.t-travel{background:#e2edf6;color:#26587c;}
+.t-project{background:#f3ecdb;color:#6d5416;}
+.t-company{background:#f0e6ea;color:#7a4a5c;}
+.t-other{background:#eeece6;color:#5e5b53;}
+
+.bk-meta{margin-top:7px;font-size:12.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+.bk-track{height:4px;border-radius:2px;background:#ece6d8;margin:10px 0 7px;overflow:hidden;}
+.bk-fill{display:block;height:100%;background:var(--accent);border-radius:2px;}
+.bk-fill.warn{background:var(--amber);}
+.bk-fill.over{background:var(--rust);}
+.bk-foot{
+  font-size:11.5px;color:var(--muted);line-height:1.6;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.bk-more{
+  position:absolute;top:7px;right:6px;border:0;background:transparent;cursor:pointer;
+  font-size:16px;line-height:1;padding:5px 8px;border-radius:6px;color:var(--ink-soft);
+}
+.bk-more:hover{background:var(--accent-soft);color:var(--accent);}
+.bk-empty{font-size:13px;color:var(--muted);padding:26px 0;text-align:center;line-height:1.8;}
+.bk-tip{
+  margin-top:24px;padding-top:14px;border-top:1px dashed var(--line);
+  font-size:12.5px;color:var(--muted);line-height:1.9;
+}
+
+/* 搬移清單 */
+.move-list{
+  max-height:42vh;overflow:auto;border:1px solid var(--line);
+  border-radius:8px;padding:4px 6px;background:#fff;
+}
+.move-row{
+  display:flex;align-items:center;gap:8px;padding:7px 4px;
+  border-bottom:1px dashed var(--line);font-size:12.5px;cursor:pointer;
+}
+.move-row:last-child{border-bottom:0;}
+.move-row input{flex:none;margin:0;width:15px;height:15px;accent-color:var(--accent);}
+.mv-date{flex:none;color:var(--muted);font-variant-numeric:tabular-nums;}
+.mv-cat{flex:none;color:var(--ink-soft);}
+.mv-amt{flex:none;font-weight:600;font-variant-numeric:tabular-nums;}
+.mv-note{flex:1 1 auto;min-width:0;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -365,6 +459,9 @@ footer{
       </div>
     </div>
     <div class="mast-actions">
+      <button class="btn book-pill" id="btnBooks" type="button" title="切換帳本／新增帳本">
+        <span id="curBookName">我的日常帳</span>
+      </button>
       <button class="btn" id="btnExportCsv" type="button">匯出 CSV</button>
       <button class="btn" id="btnExportTxt" type="button">匯出 TXT</button>
       <button class="btn" id="btnBackup" type="button">備份 JSON</button>
@@ -378,6 +475,13 @@ footer{
     <span class="txt" id="backupNoticeTxt"></span>
     <button class="btn tiny" id="btnNoticeBackup" type="button">立即備份</button>
     <button class="btn tiny" id="btnNoticeSnooze" type="button">三天後再提醒</button>
+  </div>
+
+  <!-- ===== 舊資料遷移提示 ===== -->
+  <div class="notice-bar" id="migrateBar" hidden>
+    <span class="txt" id="migrateTxt"></span>
+    <button class="btn tiny" id="btnMigrateMove" type="button">開始分類</button>
+    <button class="btn tiny" id="btnMigrateLater" type="button">稍後再說</button>
   </div>
 
   <!-- ===== 統計概覽 ===== -->
@@ -400,6 +504,13 @@ footer{
     </article>
   </section>
   <p class="scope">目前統計範圍：<b id="scopeHint">全部紀錄</b><span>（變更下方篩選條件即同步更新）</span></p>
+  <div class="scope-row">
+    <span class="seg" id="scopeSeg" role="group" aria-label="統計範圍">
+      <button type="button" data-scope="book" class="on">本帳</button>
+      <button type="button" data-scope="all">全部帳本</button>
+    </span>
+    <span id="scopeBookHint">只看本帳；切到「全部帳本」可看合計</span>
+  </div>
 
   <!-- ===== 本月預算與近六個月趨勢 ===== -->
   <section class="panel">
@@ -589,6 +700,7 @@ footer{
       <select id="fltCat" aria-label="依類別篩選"><option value="all">全部類別</option></select>
       <input id="fltQuery" type="search" placeholder="搜尋備註或類別…" aria-label="關鍵字搜尋">
       <button class="btn" id="btnReset" type="button">清除篩選</button>
+      <button class="btn" id="btnMoveOpen" type="button" title="把本帳的紀錄搬到另一本帳">搬移紀錄</button>
     </div>
     <div class="table-scroll">
       <table>
@@ -630,6 +742,10 @@ footer{
         <p>每天零碎的花費最難掌握，等到月底才發現錢不見了。這份工具把「記一筆」壓到三秒內完成：選類別、打金額、按下去就好，日期自動帶入今天，不需要開表單層層填寫。</p>
         <h3>核心功能</h3>
         <ul>
+          <li>多帳本：日常、旅遊、公司報帳各開一本，從右上帳本按鈕進「我的帳本」書架頁切換</li>
+          <li>每本帳各自擁有紀錄、類別、預算、常用一鍵與店家記憶，互不干擾</li>
+          <li>統計可切「本帳」或「全部帳本」，月底看總合或單一專案都行</li>
+          <li>跨帳本搬移：勾選紀錄整批搬到另一本；帳本可封存或刪除，封存的不列入全部統計</li>
           <li>新增消費：日期、類別、金額、備註，含輸入驗證</li>
           <li>發票／收據自動入帳：照片、截圖、財政部寄來的電子發票 PDF 都吃，先掃 QR，沒有 QR 才用文字辨識</li>
           <li>金額智慧判讀：先遮掉日期、統編、電話等非金額數字，再逐個數字評分取最可能的總額，並提供前 3 名候選一鍵套用</li>
@@ -665,6 +781,8 @@ footer{
           <li>憑證縮圖存在瀏覽器內，容量約 5MB，滿了只保留帳目、捨棄圖片</li>
           <li>備份檔存在你自己的裝置或雲端硬碟，網站沒有伺服器，無法代為保管</li>
           <li>預算以「本月」計算，不隨篩選條件變動；趨勢則會套用類別與關鍵字篩選</li>
+          <li>舊版單一帳本的資料會自動歸到「我的日常帳」，需要分開時再用「搬移紀錄」分類</li>
+          <li>帳本上限 20 本，所有帳本共用同一個瀏覽器儲存空間（約 5MB）；紀錄清單每次最多列出 200 筆</li>
         </ul>
       </div>
     </div>
@@ -722,6 +840,80 @@ footer{
   </div>
 </dialog>
 
+<!-- ===== 我的帳本（書架頁） ===== -->
+<div class="books-page" id="booksPage" hidden>
+  <div class="bk-shell">
+    <div class="bk-head">
+      <button class="btn tiny" id="btnBooksBack" type="button">← 回記帳</button>
+      <h2>我的帳本</h2>
+      <button class="btn primary tiny" id="btnNewBook" type="button">＋ 新帳本</button>
+    </div>
+    <p class="bk-sub" id="booksSummary">—</p>
+    <div class="book-grid" id="bookGrid"></div>
+    <p class="bk-empty" id="booksEmpty" hidden>還沒有帳本，按右上「＋ 新帳本」建立第一本。</p>
+    <p class="bk-tip">
+      每一本帳各自擁有紀錄、類別、預算、常用一鍵與店家記憶，互不干擾。<br>
+      日常開銷、旅遊旅費、公司報帳各開一本，月底才不會混在一起。<br>
+      封存的帳不列入「全部帳本」統計，資料仍保留；刪除前記得先「備份 JSON」。
+    </p>
+  </div>
+</div>
+
+<!-- ===== 帳本設定 ===== -->
+<dialog id="bookDlg">
+  <form class="dlg-body" id="bookForm">
+    <h3 id="bookDlgTitle">新增帳本</h3>
+    <div class="field">
+      <label for="bName">帳本名稱</label>
+      <input id="bName" maxlength="16" placeholder="例：日常、日本旅費、公司報帳" required>
+    </div>
+    <div class="field">
+      <label for="bType">類型</label>
+      <select id="bType">
+        <option value="daily">日常</option>
+        <option value="travel">旅遊</option>
+        <option value="project">專案</option>
+        <option value="company">公司</option>
+        <option value="other">其他</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="bNote">這本帳的備忘（選填）</label>
+      <input id="bNote" maxlength="60" placeholder="例：這趟旅費上限 3 萬">
+    </div>
+    <div class="dlg-actions" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <span>
+        <button class="btn tiny" type="button" id="btnBookCopy">複製這本</button>
+        <button class="btn tiny" type="button" id="btnBookArchive">封存</button>
+        <button class="btn tiny danger" type="button" id="btnBookDelete">刪除</button>
+      </span>
+      <span>
+        <button class="btn" type="button" id="btnBookCancel">取消</button>
+        <button class="btn primary" type="submit" id="btnBookSave">儲存</button>
+      </span>
+    </div>
+  </form>
+</dialog>
+
+<!-- ===== 搬移紀錄 ===== -->
+<dialog id="moveDlg">
+  <form class="dlg-body" id="moveForm">
+    <h3>把紀錄搬到另一本帳</h3>
+    <div class="field">
+      <label for="mvTarget">搬到</label>
+      <select id="mvTarget"></select>
+    </div>
+    <div class="field">
+      <label>勾選要搬的紀錄（目前帳本，最多列出 200 筆）</label>
+      <div class="move-list" id="mvList"></div>
+    </div>
+    <div class="dlg-actions">
+      <button class="btn" type="button" id="btnMoveCancel">取消</button>
+      <button class="btn primary" type="submit">搬移</button>
+    </div>
+  </form>
+</dialog>
+
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -733,22 +925,41 @@ footer{
 (function () {
   "use strict";
 
-  var STORE_KEY = "life-ledger-v1";
-  var SETTINGS_KEY = "life-ledger-settings-v1";
+  var STORE_KEY = "life-ledger-v1";                 // 舊版單一帳本 key（只用來匯入舊資料）
+  var SETTINGS_KEY = "life-ledger-settings-v1";     // 舊版設定 key（同上）
+  var BOOKS_KEY = "life-ledger-books-v2";           // 帳本清單
+  var DATA_KEY = "life-ledger-books-data-v2";       // 各本帳的紀錄／店家／設定
+  var CUR_KEY = "life-ledger-cur-book-v2";          // 上次開的是哪一本
+  var PREF_KEY = "life-ledger-prefs-v1";            // 統計範圍、遷移提示狀態
   var DEFAULT_CATS = ["餐飲", "交通", "日用品", "娛樂", "醫療", "學費", "房租", "通訊", "其他"];
 
-  /* 設定：預算、常用組合、備份狀態（與帳目分開存，壞掉也不會影響帳目） */
-  var settings = {
-    budgets: { total: 0, cats: {} },
-    quick: [],
-    lastBackupAt: null,
-    lastBackupCount: 0,
-    snoozeUntil: 0,
-    alert: {}
-  };
+  var BOOK_TYPES = { daily: "日常", travel: "旅遊", project: "專案", company: "公司", other: "其他" };
 
-  var records = [];          // 全部紀錄
-  var editingId = null;      // 目前正在編輯的紀錄 id
+  function defaultSettings() {
+    return {
+      budgets: { total: 0, cats: {} },
+      quick: [],
+      lastBackupAt: null,
+      lastBackupCount: 0,
+      snoozeUntil: 0,
+      alert: {}
+    };
+  }
+
+  function emptyBookData() {
+    return { records: [], sellers: {}, settings: defaultSettings() };
+  }
+
+  var books = [];              // [{ id, name, type, createdAt, archived, note }]
+  var bookData = {};           // bookId -> { records, sellers, settings }
+  var currentBookId = "";
+  var statsScope = "book";     // book = 只看本帳 / all = 全部帳本
+  var migrationInfo = null;    // 從舊版匯入的筆數，用來提示一次
+  var migrationDismissAt = 0;
+
+  var settings = defaultSettings();
+  var records = [];            // 目前帳本的紀錄（會跟著帳本切換）
+  var editingId = null;
   var filter = { month: "all", cat: "all", q: "" };
 
   /* ---------- 通用小工具 ---------- */
@@ -785,33 +996,79 @@ footer{
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
-  /* ---------- 讀寫 localStorage ---------- */
-  function load() {
-    try {
-      var raw = localStorage.getItem(STORE_KEY);
-      var parsed = raw ? JSON.parse(raw) : [];
-      records = Array.isArray(parsed) ? parsed.filter(function (r) {
-        return r && r.id && r.date && Number(r.amount) > 0;
-      }) : [];
-    } catch (e) {
-      records = [];
-    }
+  /* ---------- 帳本層：建立、切換、儲存 ---------- */
+  function validRecord(r) {
+    return !!(r && r.id && r.date && Number(r.amount) > 0);
   }
 
-  function save() {
+  function newBook(name, type, note) {
+    var nm = String(name == null ? "" : name).trim().slice(0, 16);
+    return {
+      id: "b" + uid(),
+      name: nm || "未命名帳本",
+      type: BOOK_TYPES[type] ? type : "daily",
+      createdAt: todayStr(),
+      archived: false,
+      note: String(note == null ? "" : note).slice(0, 60)
+    };
+  }
+
+  function curBook() {
+    for (var i = 0; i < books.length; i++) if (books[i].id === currentBookId) return books[i];
+    return books[0] || null;
+  }
+
+  /* 全部帳本（不含封存）的紀錄，供統計切換使用 */
+  function allRecords() {
+    var out = [];
+    books.forEach(function (b) {
+      if (b.archived) return;
+      var d = bookData[b.id];
+      if (d && Array.isArray(d.records)) out = out.concat(d.records);
+    });
+    return out;
+  }
+
+  function totalRecords() {
+    var n = 0;
+    Object.keys(bookData).forEach(function (k) { n += (bookData[k].records || []).length; });
+    return n;
+  }
+
+  function bookSpent(bookId, month) {
+    var d = bookData[bookId], t = 0;
+    ((d && d.records) || []).forEach(function (r) {
+      if (monthOf(r.date) === month) t += Number(r.amount) || 0;
+    });
+    return t;
+  }
+
+  /* 一次寫入「帳本清單 + 各本資料」；空間不足時犧牲憑證圖，保住帳目 */
+  function persistData() {
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify(records));
+      localStorage.setItem(DATA_KEY, JSON.stringify(bookData));
+      localStorage.setItem(BOOKS_KEY, JSON.stringify(books));
       return true;
     } catch (e) {
-      // 憑證縮圖佔空間，存不下時先犧牲圖片、保住帳目
       try {
-        var lean = records.map(function (r) {
-          var o = { id: r.id, date: r.date, cat: r.cat, amount: r.amount, note: r.note };
-          if (r.invoiceNo) o.invoiceNo = r.invoiceNo;
-          if (r.sellerId) o.sellerId = r.sellerId;
-          return o;
+        var lean = {};
+        Object.keys(bookData).forEach(function (k) {
+          var d = bookData[k];
+          lean[k] = {
+            records: (d.records || []).map(function (r) {
+              var o = { id: r.id, date: r.date, cat: r.cat, amount: r.amount, note: r.note };
+              if (r.invoiceNo) o.invoiceNo = r.invoiceNo;
+              if (r.sellerId) o.sellerId = r.sellerId;
+              return o;
+            }),
+            sellers: d.sellers || {},
+            settings: d.settings || defaultSettings()
+          };
         });
-        localStorage.setItem(STORE_KEY, JSON.stringify(lean));
+        bookData = lean;
+        records = (bookData[currentBookId] && bookData[currentBookId].records) || [];
+        localStorage.setItem(DATA_KEY, JSON.stringify(bookData));
+        localStorage.setItem(BOOKS_KEY, JSON.stringify(books));
         toast("儲存空間不足：帳目已保存，憑證圖片這次沒有存下來");
         return true;
       } catch (e2) {
@@ -821,37 +1078,156 @@ footer{
     }
   }
 
-  /* ---------- 讀寫設定（預算、常用、備份狀態） ---------- */
-  function loadSettings() {
-    try {
-      var raw = localStorage.getItem(SETTINGS_KEY);
-      var p = raw ? JSON.parse(raw) : null;
-      if (p && typeof p === "object") {
-        settings.budgets = {
-          total: Number(p.budgets && p.budgets.total) || 0,
-          cats: (p.budgets && p.budgets.cats && typeof p.budgets.cats === "object") ? p.budgets.cats : {}
-        };
-        settings.quick = Array.isArray(p.quick) ? p.quick.filter(function (q) {
-          return q && q.cat && Number(q.amount) > 0;
-        }) : [];
-        settings.lastBackupAt = p.lastBackupAt || null;
-        settings.lastBackupCount = Number(p.lastBackupCount) || 0;
-        settings.snoozeUntil = Number(p.snoozeUntil) || 0;
-        settings.alert = (p.alert && typeof p.alert === "object") ? p.alert : {};
-      }
-    } catch (e) {
-      // 設定檔壞了就回到預設值，不影響帳目
-    }
+  /* 切到某一本帳：把它的紀錄／店家／設定接到全域變數上 */
+  function activate(id) {
+    var b = null;
+    for (var i = 0; i < books.length; i++) if (books[i].id === id) b = books[i];
+    if (!b) b = books[0];
+    if (!b) return;
+
+    currentBookId = b.id;
+    var d = bookData[b.id];
+    if (!d) { d = emptyBookData(); bookData[b.id] = d; }
+
+    records = Array.isArray(d.records) ? d.records : (d.records = []);
+    sellerMap = (d.sellers && typeof d.sellers === "object") ? d.sellers : (d.sellers = {});
+
+    var st = defaultSettings();
+    var saved = (d.settings && typeof d.settings === "object") ? d.settings : {};
+    st.budgets = {
+      total: Number(saved.budgets && saved.budgets.total) || 0,
+      cats: (saved.budgets && saved.budgets.cats && typeof saved.budgets.cats === "object") ? saved.budgets.cats : {}
+    };
+    st.quick = Array.isArray(saved.quick) ? saved.quick.filter(function (q) {
+      return q && q.cat && Number(q.amount) > 0;
+    }) : [];
+    st.lastBackupAt = saved.lastBackupAt || null;
+    st.lastBackupCount = Number(saved.lastBackupCount) || 0;
+    st.snoozeUntil = Number(saved.snoozeUntil) || 0;
+    st.alert = (saved.alert && typeof saved.alert === "object") ? saved.alert : {};
+    settings = st;
+
+    filter = { month: "all", cat: "all", q: "" };
+    try { localStorage.setItem(CUR_KEY, currentBookId); } catch (e) {}
+    updateBookChrome();
   }
 
+  /* 舊版（單一帳本）資料 → 自動開一本「我的日常帳」並整批搬進去，舊 key 保留不動當保險 */
+  function migrateLegacy() {
+    var oldRecs = [], oldSellers = {}, oldSettings = null;
+
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      var p = raw ? JSON.parse(raw) : [];
+      oldRecs = Array.isArray(p) ? p.filter(validRecord) : [];
+    } catch (e) {}
+    try {
+      var s = localStorage.getItem("life-ledger-sellers-v1");
+      var sp = s ? JSON.parse(s) : null;
+      oldSellers = (sp && typeof sp === "object") ? sp : {};
+    } catch (e) {}
+    try {
+      var t = localStorage.getItem(SETTINGS_KEY);
+      var tp = t ? JSON.parse(t) : null;
+      oldSettings = (tp && typeof tp === "object") ? tp : null;
+    } catch (e) {}
+
+    var bk = newBook(oldRecs.length ? "我的日常帳" : "我的帳本", "daily", "");
+    books = [bk];
+    bookData = {};
+
+    var d = emptyBookData();
+    d.records = oldRecs;
+    d.sellers = oldSellers;
+    if (oldSettings) {
+      d.settings.budgets = {
+        total: Number(oldSettings.budgets && oldSettings.budgets.total) || 0,
+        cats: (oldSettings.budgets && oldSettings.budgets.cats) || {}
+      };
+      d.settings.quick = Array.isArray(oldSettings.quick) ? oldSettings.quick : [];
+      d.settings.lastBackupAt = oldSettings.lastBackupAt || null;
+      d.settings.lastBackupCount = Number(oldSettings.lastBackupCount) || 0;
+      d.settings.snoozeUntil = Number(oldSettings.snoozeUntil) || 0;
+      d.settings.alert = (oldSettings.alert && typeof oldSettings.alert === "object") ? oldSettings.alert : {};
+    }
+
+    bookData[bk.id] = d;
+    currentBookId = bk.id;
+    if (oldRecs.length) migrationInfo = { count: oldRecs.length, at: todayStr() };
+  }
+
+  /* ---------- 讀寫 localStorage ---------- */
+  function load() {
+    var ok = false;
+    try {
+      var bRaw = localStorage.getItem(BOOKS_KEY);
+      var dRaw = localStorage.getItem(DATA_KEY);
+      var b = bRaw ? JSON.parse(bRaw) : null;
+      var d = dRaw ? JSON.parse(dRaw) : null;
+      if (Array.isArray(b) && b.length && d && typeof d === "object") {
+        books = b.filter(function (x) { return x && x.id && x.name; });
+        bookData = d;
+        ok = books.length > 0;
+      }
+    } catch (e) { ok = false; }
+
+    if (!ok) migrateLegacy();
+
+    // 清理格式不完整的資料
+    books.forEach(function (bk) {
+      var d = bookData[bk.id];
+      if (!d || typeof d !== "object") { bookData[bk.id] = emptyBookData(); return; }
+      d.records = Array.isArray(d.records) ? d.records.filter(validRecord) : [];
+      d.sellers = (d.sellers && typeof d.sellers === "object") ? d.sellers : {};
+      d.settings = (d.settings && typeof d.settings === "object") ? d.settings : defaultSettings();
+    });
+
+    var cur = "";
+    try { cur = localStorage.getItem(CUR_KEY) || ""; } catch (e) {}
+    var found = false;
+    for (var i = 0; i < books.length; i++) if (books[i].id === cur) found = true;
+    activate(found ? cur : (books[0] ? books[0].id : ""));
+    persistData();
+  }
+
+  function save() {
+    var d = bookData[currentBookId];
+    if (!d) return false;
+    d.records = records;
+    return persistData();
+  }
+
+  /* ---------- 使用者偏好（統計範圍、提示狀態） ---------- */
+  function loadPrefs() {
+    try {
+      var p = JSON.parse(localStorage.getItem(PREF_KEY) || "null");
+      if (p && p.statsScope === "all") statsScope = "all";
+      if (p && Number(p.migrationDismissAt) > 0) migrationDismissAt = Number(p.migrationDismissAt);
+    } catch (e) {}
+  }
+
+  function savePrefs() {
+    try {
+      localStorage.setItem(PREF_KEY, JSON.stringify({
+        statsScope: statsScope,
+        migrationDismissAt: migrationDismissAt
+      }));
+    } catch (e) {}
+  }
+
+  /* ---------- 儲存設定（每本帳各自的預算與常用） ---------- */
   function saveSettings() {
-    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+    var d = bookData[currentBookId];
+    if (!d) return;
+    d.settings = JSON.parse(JSON.stringify(settings));
+    persistData();
   }
 
   /* ---------- 篩選 ---------- */
-  function filtered() {
+  function filtered(src) {
+    var base = Array.isArray(src) ? src : records;
     var q = filter.q.trim().toLowerCase();
-    return records.filter(function (r) {
+    return base.filter(function (r) {
       if (filter.month !== "all" && monthOf(r.date) !== filter.month) return false;
       if (filter.cat !== "all" && r.cat !== filter.cat) return false;
       if (q) {
@@ -921,8 +1297,9 @@ footer{
 
   /* ---------- 渲染：概覽 + 表格 + 佔比 ---------- */
   function render() {
-    var list = filtered();
-    var s = stats(list);
+    var list = filtered(records);                 // 表格永遠是本帳的紀錄
+    var bookStats = stats(list);                  // 本帳合計（表尾用）
+    var s = statsScope === "all" ? stats(filtered(allRecords())) : bookStats;
 
     $("statTotal").textContent = money(s.total);
     $("statCount").textContent = String(s.count);
@@ -933,7 +1310,8 @@ footer{
     if (filter.month !== "all") scope.push(filter.month.replace("-", " 年 ") + " 月");
     if (filter.cat !== "all") scope.push("類別「" + filter.cat + "」");
     if (filter.q.trim()) scope.push("關鍵字「" + filter.q.trim() + "」");
-    $("scopeHint").textContent = scope.length ? scope.join(" · ") : "全部紀錄";
+    scope.unshift((curBook() ? "「" + curBook().name + "」" : "") + (statsScope === "all" ? "全部帳本" : "本帳"));
+    $("scopeHint").textContent = scope.join(" · ");
 
     // 表格
     var tbody = $("tbody");
@@ -955,9 +1333,9 @@ footer{
     var hasRows = list.length > 0;
     $("emptyState").hidden = hasRows;
     $("tfoot").hidden = !hasRows;
-    $("footSum").textContent = money(s.total);
+    $("footSum").textContent = money(bookStats.total);
     $("listNote").textContent = records.length
-      ? "共 " + records.length + " 筆，目前顯示 " + list.length + " 筆"
+      ? "「" + ((curBook() && curBook().name) || "本帳") + "」共 " + records.length + " 筆，目前顯示 " + list.length + " 筆"
       : "";
 
     // 佔比
@@ -979,6 +1357,19 @@ footer{
           "</div>";
       }).join("");
     }
+
+    // 統計範圍切換鈕的狀態與說明
+    var seg = $("scopeSeg");
+    if (seg) {
+      var btns = seg.querySelectorAll("button[data-scope]");
+      for (var bi = 0; bi < btns.length; bi++) {
+        btns[bi].classList.toggle("on", btns[bi].getAttribute("data-scope") === statsScope);
+      }
+    }
+    var activeBooks = books.filter(function (b) { return !b.archived; });
+    $("scopeBookHint").textContent = statsScope === "all"
+      ? "統計 " + activeBooks.length + " 本使用中帳本；本帳另有 " + list.length + " 筆"
+      : "只看本帳；切到「全部帳本」可看合計";
 
     // 預算進度、六個月趨勢與備份提醒跟著一起重畫
     renderBudget();
@@ -1171,20 +1562,15 @@ footer{
      後段以「:」分隔，含營業人自用區、品目筆數、編碼參數、品名／數量／單價。
   ================================================================== */
   var SELLER_KEY = "life-ledger-sellers-v1";
-  var sellerMap = {};        // 賣方統編 -> { name, cat }，用來記住同一店家歸哪一類
+  var sellerMap = {};        // 賣方統編 -> { name, cat }，這本帳自己的店家記憶
   var draft = null;          // 目前待確認的解析草稿
   var busy = false;          // 避免同時處理多張圖
 
-  function loadSellers() {
-    try {
-      var raw = localStorage.getItem(SELLER_KEY);
-      var parsed = raw ? JSON.parse(raw) : {};
-      sellerMap = (parsed && typeof parsed === "object") ? parsed : {};
-    } catch (e) { sellerMap = {}; }
-  }
-
   function saveSellers() {
-    try { localStorage.setItem(SELLER_KEY, JSON.stringify(sellerMap)); } catch (e) {}
+    var d = bookData[currentBookId];
+    if (!d) return;
+    d.sellers = sellerMap;
+    persistData();
   }
 
   /* 店家／品項關鍵字 → 類別，僅作為「建議值」，使用者永遠可以改 */
@@ -2171,10 +2557,11 @@ footer{
     var wrap = $("trendWrap");
     var months = lastMonths(6);
     var q = filter.q.trim().toLowerCase();
+    var srcRecs = statsScope === "all" ? allRecords() : records;   // 趨勢跟著統計範圍走
 
     var vals = months.map(function (m) {
       var t = 0;
-      records.forEach(function (r) {
+      srcRecs.forEach(function (r) {
         if (monthOf(r.date) !== m) return;
         if (filter.cat !== "all" && r.cat !== filter.cat) return;
         if (q && (r.cat + " " + (r.note || "")).toLowerCase().indexOf(q) === -1) return;
@@ -2295,20 +2682,21 @@ footer{
 
   /* ---------- ④ 備份與還原 ---------- */
   function doBackup() {
+    save();
     var payload = {
       app: "life-ledger",
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString().slice(0, 10),
-      records: records,
-      sellers: sellerMap,
-      settings: { budgets: settings.budgets, quick: settings.quick }
+      books: books,
+      data: bookData,
+      currentBookId: currentBookId
     };
     download("生活記帳簿備份_" + todayStr() + ".json", JSON.stringify(payload, null, 2), "application/json;charset=utf-8");
     settings.lastBackupAt = todayStr();
     settings.lastBackupCount = records.length;
     saveSettings();
     renderBackupNotice();
-    toast("已下載備份檔（" + records.length + " 筆）");
+    toast("已下載備份（" + books.length + " 本帳、" + totalRecords() + " 筆）");
   }
 
   function doRestore(file) {
@@ -2319,17 +2707,50 @@ footer{
       try { data = JSON.parse(String(reader.result)); } catch (e) { data = null; }
       if (!data) { toast("這不是有效的備份檔（JSON 讀不進來）"); return; }
 
+      var when = data.exportedAt || "未標示日期";
+
+      // 新版備份：一次含多本帳
+      if (Number(data.version) === 2 && Array.isArray(data.books) && data.data && typeof data.data === "object") {
+        var newBooks = data.books.filter(function (b) { return b && b.id && b.name; });
+        var newData = {}, count = 0;
+        newBooks.forEach(function (b) {
+          var d = data.data[b.id] || emptyBookData();
+          d.records = Array.isArray(d.records) ? d.records.filter(validRecord) : [];
+          d.sellers = (d.sellers && typeof d.sellers === "object") ? d.sellers : {};
+          d.settings = (d.settings && typeof d.settings === "object") ? d.settings : defaultSettings();
+          newData[b.id] = d;
+          count += d.records.length;
+        });
+        if (!newBooks.length) { toast("備份檔裡沒有可用的帳本，先不覆蓋"); return; }
+        if (!confirm("確定要還原這份備份嗎？\n\n備份內容：" + newBooks.length + " 本帳、" + count + " 筆（" + when +
+                     "）\n目前：" + books.length + " 本帳、" + totalRecords() + " 筆，會被整份覆蓋。")) return;
+
+        books = newBooks;
+        bookData = newData;
+        var cur = data.currentBookId, ok = false;
+        for (var i = 0; i < books.length; i++) if (books[i].id === cur) ok = true;
+        activate(ok ? cur : books[0].id);
+        persistData();
+        migrationInfo = null;
+        updateBookChrome();
+        fillSelects();
+        renderQuick();
+        render();
+        renderMigrateBar();
+        if (!$("booksPage").hidden) renderBooks();
+        toast("已還原 " + books.length + " 本帳、" + count + " 筆紀錄");
+        return;
+      }
+
+      // 舊版備份（單一帳本）：只匯入目前這本
       var recs = Array.isArray(data) ? data : (Array.isArray(data.records) ? data.records : null);
       if (!recs) { toast("備份檔裡找不到紀錄資料"); return; }
 
-      var valid = recs.filter(function (r) {
-        return r && r.id && r.date && Number(r.amount) > 0;
-      });
+      var valid = recs.filter(validRecord);
       if (!valid.length) { toast("這份備份有 " + recs.length + " 筆，但格式都不完整，先不覆蓋"); return; }
 
-      var when = data.exportedAt || "未標示日期";
-      if (!confirm("確定要還原這份備份嗎？\n\n備份內容： " + valid.length + " 筆（" + when + "）\n目前紀錄： " +
-                   records.length + " 筆，會被覆蓋。")) return;
+      if (!confirm("確定要還原這份備份嗎？\n\n備份內容： " + valid.length + " 筆（" + when + "）\n會覆蓋目前「" +
+                   ((curBook() && curBook().name) || "本帳") + "」的 " + records.length + " 筆。")) return;
 
       records = valid;
       if (data.sellers && typeof data.sellers === "object") {
@@ -2386,6 +2807,304 @@ footer{
       box.hidden = true;
     }
   }
+
+  /* ==================================================================
+     ⑤ 多帳本（書架頁）
+     ================================================================== */
+
+  function updateBookChrome() {
+    var b = curBook();
+    var el = $("curBookName");
+    if (!el) return;
+    el.textContent = b ? b.name : "我的帳本";
+    el.title = b ? ("類型：" + (BOOK_TYPES[b.type] || "其他")) : "";
+  }
+
+  function renderBooks() {
+    var grid = $("bookGrid");
+    if (!grid) return;
+    var month = todayMonth();
+    var active = books.filter(function (b) { return !b.archived; });
+    var arch = books.filter(function (b) { return b.archived; });
+    var total = 0;
+    active.forEach(function (b) { total += bookSpent(b.id, month); });
+
+    $("booksSummary").textContent = "共 " + books.length + " 本帳（" + active.length +
+      " 本使用中、 " + arch.length + " 本封存）· 本月合計 " + money(total) + " 元";
+    $("booksEmpty").hidden = books.length > 0;
+
+    grid.innerHTML = books.map(function (b) {
+      var spent = bookSpent(b.id, month);
+      var d = bookData[b.id] || emptyBookData();
+      var bud = Number((d.settings && d.settings.budgets && d.settings.budgets.total) || 0);
+      var pct = bud > 0 ? spent / bud * 100 : 0;
+      var lv = pct >= 100 ? " over" : (pct >= 80 ? " warn" : "");
+      return '<div class="book-card' + (b.id === currentBookId ? " cur" : "") + (b.archived ? " arch" : "") +
+        '" data-id="' + esc(b.id) + '" role="button" tabindex="0">' +
+        '<button class="bk-more" type="button" data-more="' + esc(b.id) + '" aria-label="帳本設定">⋯</button>' +
+        '<div class="bk-top"><b>' + esc(b.name) + '</b>' +
+          '<span class="bk-tag t-' + esc(b.type) + '">' + esc(BOOK_TYPES[b.type] || "其他") + "</span></div>" +
+        '<div class="bk-meta">' + (d.records || []).length + " 筆 · 本月 " + money(spent) + " 元</div>" +
+        '<div class="bk-track"><span class="bk-fill' + lv + '" style="width:' + Math.min(100, pct).toFixed(1) + '%"></span></div>' +
+        '<div class="bk-foot">' + (bud > 0 ? ("預算 " + num0(bud) + " · 已用 " + pct.toFixed(0) + "%") : "尚未設定預算") +
+          (b.note ? " · " + esc(b.note) : "") + "</div>" +
+        "</div>";
+    }).join("");
+  }
+
+  function openBooks() {
+    renderBooks();
+    $("booksPage").hidden = false;
+    document.body.classList.add("locked");
+    if (location.hash !== "#/books") history.replaceState(null, "", "#/books");
+  }
+
+  function closeBooks() {
+    $("booksPage").hidden = true;
+    document.body.classList.remove("locked");
+    if (location.hash === "#/books") history.replaceState(null, "", location.pathname + location.search);
+  }
+
+  function enterBook(id) {
+    if (id === currentBookId) { closeBooks(); return; }
+    save();                      // 先把目前這本的變更落地
+    activate(id);
+    closeBooks();
+    fillSelects();
+    renderQuick();
+    render();
+    renderMigrateBar();
+    toast("已切到「" + ((curBook() && curBook().name) || "帳本") + "」");
+  }
+
+  var editingBookId = null;
+
+  function showDlg(id) {
+    var d = $(id);
+    if (!d) return;
+    if (typeof d.showModal === "function") d.showModal();
+    else d.setAttribute("open", "open");
+  }
+
+  function closeDlg(id) {
+    var d = $(id);
+    if (!d) return;
+    if (typeof d.close === "function" && d.open) d.close();
+    else d.removeAttribute("open");
+  }
+
+  function openBookDlg(id) {
+    editingBookId = id || null;
+    var b = null;
+    for (var i = 0; i < books.length; i++) if (books[i].id === id) b = books[i];
+
+    $("bookDlgTitle").textContent = b ? ("編輯「" + b.name + "」") : "新增帳本";
+    $("bName").value = b ? b.name : "";
+    $("bType").value = b ? b.type : "daily";
+    $("bNote").value = b ? (b.note || "") : "";
+    $("btnBookCopy").hidden = !b;
+    $("btnBookArchive").hidden = !b;
+    $("btnBookDelete").hidden = !b;
+    $("btnBookArchive").textContent = (b && b.archived) ? "取消封存" : "封存";
+    showDlg("bookDlg");
+    setTimeout(function () { try { $("bName").focus(); } catch (e) {} }, 60);
+  }
+
+  /* 舊資料遷移提示：只顯示到使用者按下「稍後再說」之後 90 天 */
+  function renderMigrateBar() {
+    var bar = $("migrateBar");
+    if (!bar) return;
+    var show = migrationInfo && Date.now() >= migrationDismissAt;
+    if (show) {
+      $("migrateTxt").textContent = "已把原本的 " + migrationInfo.count + " 筆紀錄歸到「" +
+        ((curBook() && curBook().name) || "我的日常帳") + "」。要現在把它們分到不同帳本嗎？";
+      bar.hidden = false;
+    } else {
+      bar.hidden = true;
+    }
+  }
+
+  function openMoveDlg() {
+    var others = books.filter(function (b) { return b.id !== currentBookId && !b.archived; });
+    if (!others.length) { toast("先新增一本帳本，才有地方可以搬"); return; }
+
+    $("mvTarget").innerHTML = others.map(function (b) {
+      return '<option value="' + esc(b.id) + '">' + esc(b.name) + "（" + esc(BOOK_TYPES[b.type] || "其他") + "）</option>";
+    }).join("");
+
+    $("mvList").innerHTML = records.slice(0, 200).map(function (r) {
+      return '<label class="move-row">' +
+        '<input type="checkbox" value="' + esc(r.id) + '">' +
+        '<span class="mv-date">' + esc(r.date) + "</span>" +
+        '<span class="mv-cat">' + esc(r.cat) + "</span>" +
+        '<span class="mv-amt">' + money(r.amount) + "</span>" +
+        '<span class="mv-note">' + esc(r.note || "—") + "</span></label>";
+    }).join("") || '<p class="quick-hint" style="margin:8px">這本帳還沒有紀錄。</p>';
+
+    showDlg("moveDlg");
+  }
+
+  /* ---------- 事件綁定（帳本） ---------- */
+  $("btnBooks").addEventListener("click", openBooks);
+  $("btnBooksBack").addEventListener("click", closeBooks);
+  $("btnNewBook").addEventListener("click", function () { openBookDlg(null); });
+  $("bookGrid").addEventListener("click", function (e) {
+    var more = e.target.closest ? e.target.closest("button[data-more]") : null;
+    if (more) { openBookDlg(more.getAttribute("data-more")); return; }
+    var card = e.target.closest ? e.target.closest(".book-card") : null;
+    if (card) enterBook(card.getAttribute("data-id"));
+  });
+  $("bookGrid").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var card = e.target.closest ? e.target.closest(".book-card") : null;
+    if (!card) return;
+    e.preventDefault();
+    enterBook(card.getAttribute("data-id"));
+  });
+  $("btnBookCancel").addEventListener("click", function () { closeDlg("bookDlg"); });
+  $("btnMoveCancel").addEventListener("click", function () { closeDlg("moveDlg"); });
+  $("btnMigrateMove").addEventListener("click", openMoveDlg);
+  $("btnMoveOpen").addEventListener("click", openMoveDlg);
+  $("btnMigrateLater").addEventListener("click", function () {
+    migrationDismissAt = Date.now() + 90 * 86400000;
+    savePrefs();
+    renderMigrateBar();
+    toast("好，三個月內不再提醒");
+  });
+
+  $("scopeSeg").addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("button[data-scope]") : null;
+    if (!b) return;
+    statsScope = b.getAttribute("data-scope") === "all" ? "all" : "book";
+    savePrefs();
+    render();
+  });
+
+  $("bookForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var name = $("bName").value.trim();
+    if (!name) { toast("請給這本帳一個名字"); return; }
+    var type = $("bType").value;
+    var note = $("bNote").value.trim();
+
+    if (editingBookId) {
+      var b = null;
+      for (var i = 0; i < books.length; i++) if (books[i].id === editingBookId) b = books[i];
+      if (b) { b.name = name; b.type = BOOK_TYPES[type] ? type : b.type; b.note = note; }
+      persistData();
+      updateBookChrome();
+      renderBooks();
+      render();
+      closeDlg("bookDlg");
+      toast("已更新帳本");
+      return;
+    }
+
+    if (books.length >= 20) { toast("最多 20 本帳，先把不用的封存起來"); return; }
+    var nb = newBook(name, type, note);
+    books.push(nb);
+    bookData[nb.id] = emptyBookData();
+    persistData();
+    closeDlg("bookDlg");
+    enterBook(nb.id);
+    toast("已新增帳本「" + nb.name + "」");
+  });
+
+  $("btnBookCopy").addEventListener("click", function () {
+    if (!editingBookId) return;
+    var b = null;
+    for (var i = 0; i < books.length; i++) if (books[i].id === editingBookId) b = books[i];
+    if (!b) return;
+    if (books.length >= 20) { toast("最多 20 本帳"); return; }
+
+    var src = bookData[b.id] || emptyBookData();
+    var nb = newBook(b.name + "（複本）", b.type, b.note);
+    var d = emptyBookData();
+    d.sellers = JSON.parse(JSON.stringify(src.sellers || {}));
+    d.settings = JSON.parse(JSON.stringify(src.settings || defaultSettings()));
+    d.settings.lastBackupAt = null;
+    d.settings.lastBackupCount = 0;
+    books.push(nb);
+    bookData[nb.id] = d;
+    persistData();
+    closeDlg("bookDlg");
+    renderBooks();
+    toast("已複製帳本（帶走類別、預算與常用，不含紀錄）");
+  });
+
+  $("btnBookArchive").addEventListener("click", function () {
+    if (!editingBookId) return;
+    var b = null;
+    for (var i = 0; i < books.length; i++) if (books[i].id === editingBookId) b = books[i];
+    if (!b) return;
+    if (!b.archived && books.filter(function (x) { return !x.archived; }).length <= 1) {
+      toast("至少要留一本使用中的帳本");
+      return;
+    }
+    b.archived = !b.archived;
+    persistData();
+    renderBooks();
+    render();
+    closeDlg("bookDlg");
+    toast(b.archived ? "已封存「" + b.name + "」" : "已取消封存「" + b.name + "」");
+  });
+
+  $("btnBookDelete").addEventListener("click", function () {
+    if (!editingBookId) return;
+    var b = null;
+    for (var i = 0; i < books.length; i++) if (books[i].id === editingBookId) b = books[i];
+    if (!b) return;
+    if (books.length <= 1) { toast("至少要保留一本帳本"); return; }
+    var n = ((bookData[b.id] && bookData[b.id].records) || []).length;
+    if (!confirm("刪除帳本「" + b.name + "」？\n\n這本帳的 " + n + " 筆紀錄會一起刪掉，無法復原。\n要留資料請先「備份 JSON」。")) return;
+
+    var wasCurrent = (b.id === currentBookId);
+    books = books.filter(function (x) { return x.id !== b.id; });
+    delete bookData[b.id];
+    if (wasCurrent) activate(books[0].id);
+    persistData();
+    closeDlg("bookDlg");
+    updateBookChrome();
+    renderBooks();
+    fillSelects();
+    renderQuick();
+    render();
+    toast("已刪除帳本");
+  });
+
+  $("moveForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var target = $("mvTarget").value;
+    var td = bookData[target];
+    if (!td) { toast("找不到目標帳本"); return; }
+
+    var ids = [];
+    var boxes = $("mvList").querySelectorAll('input[type="checkbox"]');
+    for (var i = 0; i < boxes.length; i++) if (boxes[i].checked) ids.push(boxes[i].value);
+    if (!ids.length) { toast("先勾選要搬的紀錄"); return; }
+
+    var moved = [];
+    records = records.filter(function (r) {
+      if (ids.indexOf(r.id) === -1) return true;
+      moved.push(r);
+      return false;
+    });
+    td.records = (td.records || []).concat(moved);
+    save();
+    closeDlg("moveDlg");
+    fillSelects();
+    render();
+    renderBooks();
+
+    var targetName = "另一本帳";
+    for (var j = 0; j < books.length; j++) if (books[j].id === target) targetName = books[j].name;
+    toast("已把 " + moved.length + " 筆搬到「" + targetName + "」");
+  });
+
+  window.addEventListener("hashchange", function () {
+    if (/^#\/books/.test(location.hash)) openBooks();
+    else closeBooks();
+  });
 
   /* ---------- 事件綁定 ---------- */
   $("btnSaveBudget").addEventListener("click", saveBudgetTotal);
@@ -2450,14 +3169,15 @@ footer{
 
   /* ---------- 啟動 ---------- */
   function init() {
-    load();
-    loadSellers();
-    loadSettings();
+    loadPrefs();
+    load();                       // 內含舊版資料遷移
     $("fDate").value = todayStr();
     $("miDate").value = todayStr();
     fillSelects();
     renderQuick();
     render();
+    renderMigrateBar();
+    if (/^#\/books/.test(location.hash)) openBooks();
   }
 
   init();
