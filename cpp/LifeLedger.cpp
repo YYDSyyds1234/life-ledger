@@ -463,8 +463,8 @@ static string barOf(double pct) {
     int n = (int)(pct / 5);
     if (n > 20) n = 20;
     string s;
-    for (int i = 0; i < n; ++i) s += '█';
-    for (int i = n; i < 20; ++i) s += '·';
+    for (int i = 0; i < n; ++i) s += "█";       // 用字串相加，避免多位元組字元常數的問題
+    for (int i = n; i < 20; ++i) s += "·";
     return s;
 }
 
@@ -757,8 +757,11 @@ static void exportCsv() {
     double sum = 0;
     for (size_t i = 0; i < idx.size(); ++i) {
         const Rec &r = curBook().recs[idx[i]];
-        string note = r.note;
-        for (size_t k = 0; k < note.size(); ++k) if (note[k] == ',') note[k] = '，';
+        string note;
+        for (size_t k = 0; k < r.note.size(); ++k) {
+            if (r.note[k] == ',') note += "，";   // 半形逗號換成全形，避免 CSV 欄位錯亂
+            else note += r.note[k];
+        }
         f << r.date << "," << CAT_NAME[r.cat] << "," << money(r.amount) << "," << note << "\n";
         sum += r.amount;
     }
@@ -977,4 +980,3 @@ int main() {
         }
     }
 }
-</content>
